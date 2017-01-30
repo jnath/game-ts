@@ -24,8 +24,12 @@ Container.prototype.dock = Dock.NONE ;
 
 export default class Layout extends Container {
 
-  private _width: number;
-  private _height: number;
+  protected _width: number;
+  protected _height: number;
+
+  protected _scaleX: number = 1;
+  protected _scaleY: number = 1;
+  protected _scaleXY: number = 1;
 
   constructor(){
     super();
@@ -36,33 +40,33 @@ export default class Layout extends Container {
     this.emit('resize');
     this.children.forEach((child: Container)=>{
       if((child.dock & Dock.NONE) == Dock.NONE){
-        console.log('NONE');
+        // console.log('NONE');
         return;
       }
-      console.log('-----------' + child.name + '-------------', child.dock);
+      // console.log('-----------' + child.name + '-------------', child.dock);
       if((child.dock & Dock.TOP) == Dock.TOP){
         child.y = 0;
-        console.log('TOP');
+        // console.log('TOP');
       }
       if((child.dock & Dock.BOTTOM) == Dock.BOTTOM) {
-        child.y = this.height - child.height;
-        console.log('BOTTOM');
+        child.y = ( this._height * this._scaleY ) - child.height;
+        // console.log('BOTTOM');
       }
       if((child.dock & Dock.LEFT) == Dock.LEFT) {
         child.x = 0;
-        console.log('LEFT');
+        // console.log('LEFT');
       }
       if((child.dock & Dock.RIGHT) == Dock.RIGHT) {
-        child.x = this.width - child.width;
-        console.log('RIGHT');
+        child.x = ( this._width * this._scaleX ) - child.width;
+        // console.log('RIGHT');
       }
       if((child.dock & Dock.CENTER) == Dock.CENTER) {
-        child.x = ( this.width - child.width ) / 2 ;
-        console.log('CENTER');
+        child.x = ( ( this._width * this._scaleX ) - child.width ) / 2 ;
+        // console.log('CENTER');
       }
       if((child.dock & Dock.MIDDLE) == Dock.MIDDLE) {
-        child.y = ( this.height - child.height ) / 2 ;
-        console.log('MIDDLE');
+        child.y = ( ( this._height * this._scaleY ) - child.height ) / 2 ;
+        // console.log('MIDDLE');
       }
 
       // child.x += child.dock.x || 0;
@@ -86,6 +90,26 @@ export default class Layout extends Container {
   get height(): number { return this._height };
   set height(value: number){
     this._height = value;
+    this.emit('updatePosition');
+  }
+
+  get scaleX(): number { return this._scaleX; }
+  set scaleX(value: number) { 
+    this._scaleX = value;
+    this.emit('updatePosition');
+  }
+
+  get scaleY(): number { return this._scaleY; }
+  set scaleY(value: number) { 
+    this._scaleY = value;
+    this.emit('updatePosition');
+  }
+
+  get scaleXY(): number { return this._scaleXY; }
+  set scaleXY(value: number) { 
+    this._scaleXY = value;
+    this._scaleX = value;
+    this._scaleY = value;
     this.emit('updatePosition');
   }
   

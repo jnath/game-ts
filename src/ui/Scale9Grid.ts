@@ -16,8 +16,6 @@ export default class Scale9Grid extends Layout {
   private _bc:Sprite;
   private _br:Sprite;
   
-  private _scaleX: number = 1;
-  private _scaleY: number = 1;
 
   constructor(texture: Texture, grid9?:Rectangle){
     super();
@@ -74,28 +72,14 @@ export default class Scale9Grid extends Layout {
 
   }
 
-  get scaleX(): number { return this._scaleX; }
-  set scaleX(value: number) { 
-    this._scaleX = value;
-    this.width = this.width * this._scaleX;
-    this.emit('resize');
-  }
-
-  get scaleY(): number { return this._scaleY; }
-  set scaleY(value: number) { 
-    this._scaleY = value; 
-    this.height = this.height * this._scaleY;
-    this.emit('resize');
-  }
-
   private resizeHandler(){
-    this._tc.width = this.width - ( this._tl.width + this._tr.width);
-    this._bc.width = this.width - ( this._bl.width + this._br.width);
-    this._ml.height = this.height - (this._tl.height + this._bl.height);
-    this._mr.height = this.height - ( this._tr.height + this._br.height);
+    this._tc.width = ( this._width * this._scaleX ) - ( this._tl.width + this._tr.width);
+    this._bc.width = ( this.width * this._scaleX ) - ( this._bl.width + this._br.width);
+    this._ml.height = ( this.height * this._scaleY ) - (this._tl.height + this._bl.height);
+    this._mr.height = ( this.height * this._scaleY ) - ( this._tr.height + this._br.height);
 
-    this._mc.width = this.width - ( this._ml.width + this._mr.width );
-    this._mc.height = this.height - ( this._tc.height + this._bc.height)
+    this._mc.width = ( this.width * this._scaleX ) - ( this._ml.width + this._mr.width );
+    this._mc.height = ( this.height * this._scaleY ) - ( this._tc.height + this._bc.height)
   }
 
   private crop(texture: Texture, rect: Rectangle): Texture {
