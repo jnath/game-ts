@@ -15,9 +15,10 @@ export default class Game extends Layout {
     this.progress.dock = Dock.MIDDLE | Dock.CENTER;
 
     let interval: number  = setInterval(()=>{
-      if(this.progress.percent > 1){
+      if(this.progress.percent + .1 >= 1){
+        clearInterval(interval);
         this.progress.percent = 1;
-        return clearInterval(interval);
+        return;
       }
       this.progress.percent += 0.1;
     }, 1000)

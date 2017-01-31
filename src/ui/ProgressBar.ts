@@ -27,6 +27,10 @@ export default class ProgressBar extends Container {
   get percent(): number { return this._percent; }
   set percent(value: number) { 
     this._percent = value;
+    if(this._percent > 1){
+      this._percent = 1;
+      return;
+    }
     this.progress.scaleX = this._percent;
   }
 
