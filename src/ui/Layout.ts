@@ -12,12 +12,9 @@ export enum Dock {
 
 declare module "pixi.js" {
     interface Container{
-      dock: Dock
-        // dock:{
-        //   state: Dock,
-        //   x?: number,
-        //   y?: number
-        // };
+      dock: Dock,
+      dockX?: number,
+      dockY?: number
     }
 }
 Container.prototype.dock = Dock.NONE ;
@@ -40,37 +37,29 @@ export default class Layout extends Container {
     this.emit('resize');
     this.children.forEach((child: Container)=>{
       if((child.dock & Dock.NONE) == Dock.NONE){
-        // console.log('NONE');
         return;
       }
-      // console.log('-----------' + child.name + '-------------', child.dock);
       if((child.dock & Dock.TOP) == Dock.TOP){
         child.y = 0;
-        // console.log('TOP');
       }
       if((child.dock & Dock.BOTTOM) == Dock.BOTTOM) {
         child.y = ( this._height * this._scaleY ) - child.height;
-        // console.log('BOTTOM');
       }
       if((child.dock & Dock.LEFT) == Dock.LEFT) {
         child.x = 0;
-        // console.log('LEFT');
       }
       if((child.dock & Dock.RIGHT) == Dock.RIGHT) {
         child.x = ( this._width * this._scaleX ) - child.width;
-        // console.log('RIGHT');
       }
       if((child.dock & Dock.CENTER) == Dock.CENTER) {
         child.x = ( ( this._width * this._scaleX ) - child.width ) / 2 ;
-        // console.log('CENTER');
       }
       if((child.dock & Dock.MIDDLE) == Dock.MIDDLE) {
         child.y = ( ( this._height * this._scaleY ) - child.height ) / 2 ;
-        // console.log('MIDDLE');
       }
 
-      // child.x += child.dock.x || 0;
-      // child.y += child.dock.y || 0;
+      child.x += child.dockX || 0;
+      child.y += child.dockY || 0;
 
     });
   }

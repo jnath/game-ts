@@ -19,7 +19,7 @@ export default class ProgressBar extends Container {
     this.progress = new Scale9Grid(Texture.fromImage('progress-percent'));
     this.addChild(this.progress);
 
-    this.padding.on('update', ()=>this.updatePosition());
+    this.padding.on('update', ()=> this.updatePosition());
     this.updatePosition();
 
   }

@@ -1,0 +1,20 @@
+{
+  "default":{
+    "progress-bg":"./assets/progress-bg.png",
+    "progress-percent":"./assets/progress-percent.png",
+    "background": "./assets/background/11_background.png"
+  },
+  "all":{
+    "panel":"./assets/panel.png",
+    "ground":"./assets/background/01_ground.png",
+    "trees_and_bushes":"./assets/background/02_trees_and_bushes.png",
+    "distant_trees":"./assets/background/03_distant_trees.png",
+    "bushes":"./assets/background/04_bushes.png",
+    "hill1":"./assets/background/05_hill1.png",
+    "hill2":"./assets/background/06_hill2.png",
+    "huge_clouds":"./assets/background/07_huge_clouds.png",
+    "clouds":"./assets/background/08_clouds.png",
+    "distant_clouds1":"./assets/background/09_distant_clouds1.png",
+    "distant_clouds":"./assets/background/10_distant_clouds.png"
+  }
+}
