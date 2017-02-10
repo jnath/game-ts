@@ -15,7 +15,7 @@ document.body.appendChild(app.view);
 
 const loader: Loader = new Loader();
 
-var game: Game;
+let game: Game;
 
 AssetLoader.loadWith('./assets/assets.json', (loaders) => {
   loaders['default'].load(() => {
@@ -26,28 +26,17 @@ AssetLoader.loadWith('./assets/assets.json', (loaders) => {
   });
 });
 
+function resize() {
+  let w = window.innerWidth;
+  let h = window.innerHeight;
 
-// loader.add('progress-bg', './assets/progress-bg.png');
-// loader.add('progress-percent', './assets/progress-percent.png');
-// loader.add('background', './assets/background/11_background.png');
-// loader.load(()=>{
-//   game = new Game();
-//   app.stage.addChild(game);
-//   resize();
-//   app.start();
-// });
+  // this part resizes the canvas but keeps ratio the same
+  app.renderer.view.style.width = w + 'px';
+  app.renderer.view.style.height = h + 'px';
 
-function resize(){
-  var w = window.innerWidth;
-  var h = window.innerHeight;
-
-  //this part resizes the canvas but keeps ratio the same
-  app.renderer.view.style.width = w + "px";
-  app.renderer.view.style.height = h + "px";
-
-  //this part adjusts the ratio:
-  app.renderer.resize(w,h);
-  if(game){
+  // this part adjusts the ratio:
+  app.renderer.resize(w, h);
+  if (game) {
     game.resize(app.renderer.width, app.renderer.height)
   }
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p .",
     "build-watch": "tsc -p . -w",
-    "start": "hs -p 8080"
+    "start": "hs -p 8081"
   },
   "author": "",
   "license": "ISC",
