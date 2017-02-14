@@ -3,6 +3,10 @@
     "module": "system",
     "target": "es5",
     "rootDir": "./src",
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "baseUrl": "./",
+    "paths": {
+      "gsap":["./node_modules/@types/gsap/index.d.ts"]
+    }
   }
 }

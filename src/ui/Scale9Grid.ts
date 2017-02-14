@@ -3,7 +3,7 @@ import { Sprite, Texture, Rectangle } from 'pixi.js';
 import Layout, { Dock } from './Layout';
 
 export default class Scale9Grid extends Layout {
-  
+
   private _tl:Sprite;
   private _tc:Sprite;
   private _tr:Sprite;
@@ -11,18 +11,20 @@ export default class Scale9Grid extends Layout {
   private _ml:Sprite;
   private _mc:Sprite;
   private _mr:Sprite;
-  
+
   private _bl:Sprite;
   private _bc:Sprite;
   private _br:Sprite;
-  
 
-  constructor(texture: Texture, grid9?:Rectangle){
+  public fixMinSize: boolean;
+
+  constructor(texture: Texture, grid9?: Rectangle, fixMinSize: boolean = true) {
     super();
 
-    grid9 = grid9 ? grid9 : new Rectangle(10, 10, texture.width - 20, texture.height - 20)
-    
-    this.resize(texture.width, texture.height);
+    this.fixMinSize = fixMinSize;
+
+    grid9 = grid9 ? grid9 : new Rectangle(10, 10, texture.width - 20, texture.height - 20);
+
 
     let frameTl: Rectangle = new Rectangle(0, 0, grid9.top, grid9.left);
     this._tl = new Sprite(this.crop(texture, frameTl));
@@ -68,18 +70,19 @@ export default class Scale9Grid extends Layout {
     this._mc.dock = Dock.MIDDLE | Dock.CENTER;
     this.addChild(this._mc);
 
-    this.on('resize', ()=>this.resizeHandler())
+    this.on('resize', () => this.resizeHandler());
+    this.resize(texture.width, texture.height);
 
   }
 
-  private resizeHandler(){
+  private resizeHandler() {
     this._tc.width = ( this._width * this._scaleX ) - ( this._tl.width + this._tr.width);
     this._bc.width = ( this.width * this._scaleX ) - ( this._bl.width + this._br.width);
     this._ml.height = ( this.height * this._scaleY ) - (this._tl.height + this._bl.height);
     this._mr.height = ( this.height * this._scaleY ) - ( this._tr.height + this._br.height);
 
     this._mc.width = ( this.width * this._scaleX ) - ( this._ml.width + this._mr.width );
-    this._mc.height = ( this.height * this._scaleY ) - ( this._tc.height + this._bc.height)
+    this._mc.height = ( this.height * this._scaleY ) - ( this._tc.height + this._bc.height);
   }
 
   private crop(texture: Texture, rect: Rectangle): Texture {

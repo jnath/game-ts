@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js'
+import { Container } from 'pixi.js';
 
 export enum Dock {
   NONE = 1 << 0,
@@ -10,14 +10,11 @@ export enum Dock {
   MIDDLE = 1 << 6,
 }
 
-declare module "pixi.js" {
-    interface Container{
-      dock: Dock
-        // dock:{
-        //   state: Dock,
-        //   x?: number,
-        //   y?: number
-        // };
+declare module 'pixi.js' {
+    interface Container {
+      dock: Dock;
+      dockX?: number;
+      dockY?: number;
     }
 }
 Container.prototype.dock = Dock.NONE ;
@@ -31,86 +28,77 @@ export default class Layout extends Container {
   protected _scaleY: number = 1;
   protected _scaleXY: number = 1;
 
-  constructor(){
+  constructor() {
     super();
-    this.on('updatePosition', () => this._childPositioning());
+    this.on('updatePosition', () => this.childPositioning());
+    this.onChildrenChange = () => this.childPositioning();
   }
 
-  private _childPositioning(){
+  protected childPositioning() {
     this.emit('resize');
-    this.children.forEach((child: Container)=>{
-      if((child.dock & Dock.NONE) == Dock.NONE){
-        // console.log('NONE');
+    this.children.forEach((child: Container) => {
+      if ((child.dock & Dock.NONE) === Dock.NONE) {
         return;
       }
-      // console.log('-----------' + child.name + '-------------', child.dock);
-      if((child.dock & Dock.TOP) == Dock.TOP){
+      if ((child.dock & Dock.TOP) === Dock.TOP) {
         child.y = 0;
-        // console.log('TOP');
       }
-      if((child.dock & Dock.BOTTOM) == Dock.BOTTOM) {
+      if ((child.dock & Dock.BOTTOM) === Dock.BOTTOM) {
         child.y = ( this._height * this._scaleY ) - child.height;
-        // console.log('BOTTOM');
       }
-      if((child.dock & Dock.LEFT) == Dock.LEFT) {
+      if ((child.dock & Dock.LEFT) === Dock.LEFT) {
         child.x = 0;
-        // console.log('LEFT');
       }
-      if((child.dock & Dock.RIGHT) == Dock.RIGHT) {
+      if ((child.dock & Dock.RIGHT) === Dock.RIGHT) {
         child.x = ( this._width * this._scaleX ) - child.width;
-        // console.log('RIGHT');
       }
-      if((child.dock & Dock.CENTER) == Dock.CENTER) {
+      if ((child.dock & Dock.CENTER) === Dock.CENTER) {
         child.x = ( ( this._width * this._scaleX ) - child.width ) / 2 ;
-        // console.log('CENTER');
       }
-      if((child.dock & Dock.MIDDLE) == Dock.MIDDLE) {
+      if ((child.dock & Dock.MIDDLE) === Dock.MIDDLE) {
         child.y = ( ( this._height * this._scaleY ) - child.height ) / 2 ;
-        // console.log('MIDDLE');
       }
 
-      // child.x += child.dock.x || 0;
-      // child.y += child.dock.y || 0;
+      child.x += child.dockX || 0;
+      child.y += child.dockY || 0;
 
     });
   }
 
-  resize(width:number, height: number){
+  resize(width: number, height: number) {
     this._width = width;
     this._height = height;
     this.emit('updatePosition');
   }
 
-  get width(): number { return this._width };
+  get width(): number { return this._width; };
   set width(value: number){
-    this._width = value;
-    this.emit('updatePosition');
+    this.resize(value, this._height);
   }
 
-  get height(): number { return this._height };
+  get height(): number { return this._height; };
   set height(value: number){
-    this._height = value;
-    this.emit('updatePosition');
+    this.resize(this._width, value);
   }
 
   get scaleX(): number { return this._scaleX; }
-  set scaleX(value: number) { 
+  set scaleX(value: number) {
     this._scaleX = value;
     this.emit('updatePosition');
   }
 
   get scaleY(): number { return this._scaleY; }
-  set scaleY(value: number) { 
+  set scaleY(value: number) {
     this._scaleY = value;
     this.emit('updatePosition');
   }
 
   get scaleXY(): number { return this._scaleXY; }
-  set scaleXY(value: number) { 
+  set scaleXY(value: number) {
     this._scaleXY = value;
     this._scaleX = value;
     this._scaleY = value;
     this.emit('updatePosition');
   }
-  
+
 }
