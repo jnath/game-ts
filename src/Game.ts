@@ -7,6 +7,7 @@ import Layout, { Dock } from './ui/Layout';
 import ProgressBar from './ui/ProgressBar';
 import Padding from './ui/Padding';
 import Panel from './ui/Panel';
+import Position from './process/Position';
 
 import gsap from 'gsap';
 declare var Elastic: any;
@@ -24,10 +25,7 @@ export default class Game extends Layout {
     this.addChild(this.background);
 
     this.progress = new ProgressBar(new Padding(10, 10, 15, 15));
-    this.progress.pivot.x = this.progress.width / 2;
-    this.progress.pivot.y = this.progress.height / 2;
-    this.progress.dockX = this.progress.pivot.x;
-    this.progress.dockY = this.progress.pivot.y;
+    this.progress.dockPivot(this.progress.width / 2, this.progress.height / 2);
     this.progress.dock = Dock.MIDDLE | Dock.CENTER;
     this.progress.visible = false;
     this.addChild(this.progress);
@@ -35,19 +33,14 @@ export default class Game extends Layout {
     setTimeout(() => {
       this.load('all', () => {
         let panel: Panel = new Panel(Texture.fromImage('panel'));
-        panel.pivot.x = panel.width / 2;
-        panel.pivot.y = panel.height / 2;
-        panel.dockX = panel.pivot.x;
-        panel.dockY = panel.pivot.y;
+        panel.dockPivot(panel.width / 2, panel.height / 2);
         panel.dock = Dock.CENTER | Dock.MIDDLE;
         this.addChild(panel);
-        gsap.from(panel.scale, 1, {
-          x: 0,
-          y: 0 ,
-          ease: Elastic.easeOut.config(1, 0.3),
-        });
+        gsap.from(panel, 1, { scaleXY: 0, ease: Elastic.easeOut.config(1, 0.3) });
       });
     }, 1000);
+
+    this.on('resize', () => Position.cover(this, this.background));
   }
 
   load(cathName: string, cb: () => void) {
@@ -58,28 +51,18 @@ export default class Game extends Layout {
     loader.onComplete.once(() => {
       loader.onProgress.detachAll();
       gsap.to(this.progress, .5, { percent: 1 });
-      gsap.to(this.progress.scale, .25, {
-        x: 0,
-        y: 0,
-        onComplete: () => {
-          this.progress.visible = false;
-          cb();
-        },
-        delay: 1
-      });
+      gsap.to(this.progress, .25, { scaleXY: 0, delay: 1, onComplete: () => {
+        this.progress.visible = false;
+        cb();
+      }});
     });
 
     this.progress.visible = true;
-    this.progress.scale.x = this.progress.scale.y = 0;
+    this.progress.scaleXY = 0;
     this.progress.percent = 0.1;
-    gsap.to(this.progress.scale, 1, {
-      x: 1,
-      y: 1 ,
-      ease: Elastic.easeOut.config(1, 0.3),
-      onComplete: () => {
-        loader.load();
-      }
-    });
+    gsap.to(this.progress, 1, { scaleXY: 1, ease: Elastic.easeOut.config(1, 0.3), onComplete: () => {
+      loader.load();
+    }});
 
   }
 

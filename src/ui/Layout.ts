@@ -11,13 +11,20 @@ export enum Dock {
 }
 
 declare module 'pixi.js' {
-    interface Container {
-      dock: Dock;
-      dockX?: number;
-      dockY?: number;
-    }
+  interface Container {
+    dock: Dock;
+    dockX?: number;
+    dockY?: number;
+    dockPivot: (x: number, y: number) => void;
+  }
 }
 Container.prototype.dock = Dock.NONE ;
+Container.prototype.dockPivot = function(x: number, y: number){
+  this.pivot.x = x;
+  this.pivot.y = y;
+  this.dockX = this.pivot.x;
+  this.dockY = this.pivot.y;
+};
 
 export default class Layout extends Container {
 

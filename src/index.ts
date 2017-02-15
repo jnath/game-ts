@@ -3,6 +3,8 @@ import { Application, loaders } from 'pixi.js';
 import Loader = loaders.Loader;
 import Resource = loaders.Resource;
 
+import './display/Sprite';
+
 import Game from './Game';
 import AssetLoader from './process/AssetLoader';
 
@@ -37,7 +39,7 @@ function resize() {
   // this part adjusts the ratio:
   app.renderer.resize(w, h);
   if (game) {
-    game.resize(app.renderer.width, app.renderer.height)
+    game.resize(app.renderer.width, app.renderer.height);
   }
 }
 
