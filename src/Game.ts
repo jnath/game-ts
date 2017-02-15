@@ -1,5 +1,5 @@
 
-import { Container, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture, extras } from 'pixi.js';
 
 import AssetLoader, { Loader } from './process/AssetLoader';
 
@@ -7,6 +7,7 @@ import Layout, { Dock } from './ui/Layout';
 import ProgressBar from './ui/ProgressBar';
 import Padding from './ui/Padding';
 import Panel from './ui/Panel';
+import Parallax from './component/Parallax';
 import Position from './process/Position';
 
 import gsap from 'gsap';
@@ -16,6 +17,8 @@ export default class Game extends Layout {
 
   progress: ProgressBar;
   background: Sprite;
+
+  parallax: Parallax;
 
   constructor() {
     super();
@@ -32,15 +35,34 @@ export default class Game extends Layout {
 
     setTimeout(() => {
       this.load('all', () => {
-        let panel: Panel = new Panel(Texture.fromImage('panel'));
-        panel.dockPivot(panel.width / 2, panel.height / 2);
-        panel.dock = Dock.CENTER | Dock.MIDDLE;
-        this.addChild(panel);
-        gsap.from(panel, 1, { scaleXY: 0, ease: Elastic.easeOut.config(1, 0.3) });
+        this.parallax = new Parallax();
+        this.parallax.add(Texture.fromImage('distant_clouds1'));
+        this.parallax.add(Texture.fromImage('distant_clouds'));
+        this.parallax.add(Texture.fromImage('huge_clouds'));
+        this.parallax.add(Texture.fromImage('clouds'));
+        this.parallax.add(Texture.fromImage('hill2'));
+        this.parallax.add(Texture.fromImage('hill1'));
+        this.parallax.add(Texture.fromImage('distant_trees'));
+        this.parallax.add(Texture.fromImage('bushes'));
+        this.parallax.add(Texture.fromImage('trees_and_bushes'));
+        this.parallax.add(Texture.fromImage('ground'));
+        this.addChild(this.parallax);
+
+        gsap.to(this.parallax, 1000, { move: -100000 });
+        // let panel: Panel = new Panel(Texture.fromImage('panel'));
+        // panel.dockPivot(panel.width / 2, panel.height / 2);
+        // panel.dock = Dock.CENTER | Dock.MIDDLE;
+        // this.addChild(panel);
+        // gsap.from(panel, 1, { scaleXY: 0, ease: Elastic.easeOut.config(1, 0.3) });
       });
     }, 1000);
 
-    this.on('resize', () => Position.cover(this, this.background));
+    this.on('resize', () => {
+      Position.cover(this, this.background);
+      if (this.parallax) {
+        Position.cover(this, this.parallax);
+      }
+    });
   }
 
   load(cathName: string, cb: () => void) {
