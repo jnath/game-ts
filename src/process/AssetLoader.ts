@@ -14,12 +14,12 @@ interface Loaders {
 export { Loader }
 
 export default class AssetLoader extends EventEmitter {
-  
-  static EVT_COMPLETE: string = 'complete';
-  
-  static loaders:Loaders = {};
 
-  constructor(){
+  static EVT_COMPLETE: string = 'complete';
+
+  static loaders: Loaders = {};
+
+  constructor() {
     super();
   }
 
@@ -27,9 +27,9 @@ export default class AssetLoader extends EventEmitter {
 
   }
 
-  static loadWith(url: string, cb:(loaders: Loaders)=>void){
+  static loadWith(url: string, cb:(loaders: Loaders) => void) {
     let loader: Loader = new Loader();
-    var assetLoader: AssetLoader = new AssetLoader();
+    let assetLoader: AssetLoader = new AssetLoader();
     loader.add(url, (ressource: Resource) => {
       let assetList: AssetList = ressource.data;
       Object.keys(assetList).forEach((cathName: string) => {
@@ -44,7 +44,7 @@ export default class AssetLoader extends EventEmitter {
   }
 
 
-  static get(cathName: string): Loader{
+  static get(cathName: string): Loader {
     return AssetLoader.loaders[cathName];
   }
 

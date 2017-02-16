@@ -1,6 +1,9 @@
 
 import { Container, Sprite, Texture, extras } from 'pixi.js';
 
+import Spine = PIXI.spine.Spine;
+import SkeletonData = PIXI.spine.core.SkeletonData;
+
 import AssetLoader, { Loader } from './process/AssetLoader';
 
 import Layout, { Dock } from './ui/Layout';
@@ -11,6 +14,7 @@ import Parallax from './component/Parallax';
 import Position from './process/Position';
 
 import gsap from 'gsap';
+
 declare var Elastic: any;
 
 export default class Game extends Layout {
@@ -19,6 +23,10 @@ export default class Game extends Layout {
   background: Sprite;
 
   parallax: Parallax;
+
+  hero: Spine;
+
+  impulse: number = 0;
 
   constructor() {
     super();
@@ -32,6 +40,8 @@ export default class Game extends Layout {
     this.progress.dock = Dock.MIDDLE | Dock.CENTER;
     this.progress.visible = false;
     this.addChild(this.progress);
+
+    this.interactive = true;
 
     setTimeout(() => {
       this.load('all', () => {
@@ -48,7 +58,19 @@ export default class Game extends Layout {
         this.parallax.add(Texture.fromImage('ground'));
         this.addChild(this.parallax);
 
-        gsap.to(this.parallax, 1000, { move: -100000 });
+        // gsap.to(this.parallax, 1000, { move: -100000 });
+
+        let spineData: SkeletonData = AssetLoader.get('all').resources['spineboy']['spineData'];
+        this.hero = new Spine(spineData);
+        // this.hero.dock = Dock.CENTER | Dock.BOTTOM;
+        this.hero.scale.set(.2);
+        this.hero.state.setAnimation(0, 'walk', true);
+
+        this.addChild(this.hero);
+        this.on('pointerdown', () => {
+            this.hero.state.setAnimation(0, 'jump', true);
+            this.impulse += 25;
+        });
         // let panel: Panel = new Panel(Texture.fromImage('panel'));
         // panel.dockPivot(panel.width / 2, panel.height / 2);
         // panel.dock = Dock.CENTER | Dock.MIDDLE;
@@ -63,6 +85,27 @@ export default class Game extends Layout {
         Position.cover(this, this.parallax);
       }
     });
+  }
+
+  render() {
+    if (!this.hero) {
+      return;
+    }
+    this.parallax.move -= 3 + this.impulse;
+    this.hero.x = ( this.width - this.hero.width ) / 2;
+    if ( this.hero.y < this.height - 90) {
+      this.hero.y += 9.8;
+    }
+    this.hero.y -= this.impulse;
+    if (this.impulse > 0) {
+      this.impulse *= 0.98;
+      if (this.hero.y >= this.height - 90) {
+        this.impulse = 0;
+      }
+    }
+    if(this.hero.y >= this.height - 90) {
+      this.hero.state.addAnimation(0, 'walk', true, 0);
+    }
   }
 
   load(cathName: string, cb: () => void) {
