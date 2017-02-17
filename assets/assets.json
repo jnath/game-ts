@@ -15,6 +15,7 @@
     "huge_clouds":"./assets/background/07_huge_clouds.png",
     "clouds":"./assets/background/08_clouds.png",
     "distant_clouds1":"./assets/background/09_distant_clouds1.png",
-    "distant_clouds":"./assets/background/10_distant_clouds.png"
+    "distant_clouds":"./assets/background/10_distant_clouds.png",
+    "spineboy":"./assets/spineboy/spineboy.json"
   }
 }

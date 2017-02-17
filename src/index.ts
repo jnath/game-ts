@@ -1,4 +1,5 @@
 import { Application, loaders } from 'pixi.js';
+import 'pixi-spine';
 
 import Loader = loaders.Loader;
 import Resource = loaders.Resource;
@@ -24,6 +25,9 @@ AssetLoader.loadWith('./assets/assets.json', (loaders) => {
     game = new Game();
     app.stage.addChild(game);
     resize();
+    app.ticker.add(() => {
+      // game.render()
+    });
     app.start();
   });
 });
