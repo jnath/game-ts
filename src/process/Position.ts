@@ -8,11 +8,11 @@ enum ResizeType {
 
 export default class Position {
 
-  static cover(container: Container, child: Container){
+  static cover(container: Container, child: Container) {
     this.targetResize(ResizeType.COVER, container, child);
   }
 
-  static contain(container: Container, child: Container){
+  static contain(container: Container, child: Container) {
     this.targetResize(ResizeType.CONTAIN, container, child);
   }
 

@@ -1,34 +1,39 @@
 
 import { Container, Sprite, Texture, extras } from 'pixi.js';
 
-import Spine = PIXI.spine.Spine;
-import SkeletonData = PIXI.spine.core.SkeletonData;
+import Parallax from './component/Parallax';
 
 import AssetLoader, { Loader } from './process/AssetLoader';
+import Hero from './element/Hero';
 
 import gsap from 'gsap';
 
 export default class GamePlay extends Container {
 
-  hero: Spine;
+  parallax: Parallax;
 
-  constructor(width: number, height: number) {
+  hero: Hero;
+
+  constructor() {
     super();
 
-    this.width = width;
-    this.height = height;
+    this.parallax = new Parallax();
+    this.parallax.add(Texture.fromImage('distant_clouds1'));
+    this.parallax.add(Texture.fromImage('distant_clouds'));
+    this.parallax.add(Texture.fromImage('huge_clouds'));
+    this.parallax.add(Texture.fromImage('clouds'));
+    this.parallax.add(Texture.fromImage('hill2'));
+    this.parallax.add(Texture.fromImage('hill1'));
+    this.parallax.add(Texture.fromImage('distant_trees'));
+    this.parallax.add(Texture.fromImage('bushes'));
+    this.parallax.add(Texture.fromImage('trees_and_bushes'));
+    this.parallax.add(Texture.fromImage('ground'));
+    this.addChild(this.parallax);
 
-    setTimeout(() => {
-      let spineData: SkeletonData = AssetLoader.get('all').resources['spineboy']['spineData'];
-      this.hero = new Spine(spineData);
-      this.hero.state.setAnimation(0, 'walk', true);
-      this.hero.scaleXY = .2;
-      this.hero.x = ( width - this.hero.width ) / 2;
-      this.hero.y = height - this.hero.height;
-      this.addChild(this.hero);
-    }, 1000);
-
-
+    this.hero = new Hero();
+    this.hero.x = (this.width - this.hero.width ) / 2;
+    this.hero.y = this.height - this.hero.height;
+    this.addChild(this.hero);
   }
 
 }

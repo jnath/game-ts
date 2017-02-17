@@ -26,7 +26,7 @@ AssetLoader.loadWith('./assets/assets.json', (loaders) => {
     app.stage.addChild(game);
     resize();
     app.ticker.add(() => {
-      game.render()
+      // game.render()
     });
     app.start();
   });
