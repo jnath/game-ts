@@ -1,10 +1,7 @@
-import { Application, loaders } from 'pixi.js';
+import { Application } from 'pixi.js';
 import 'pixi-spine';
 
-import Loader = loaders.Loader;
-import Resource = loaders.Resource;
-
-import './display/Sprite';
+import './display/Container';
 
 import Game from './Game';
 import AssetLoader from './process/AssetLoader';
@@ -16,8 +13,6 @@ app.renderer.autoResize = true;
 // Add the view to the DOM
 document.body.appendChild(app.view);
 
-const loader: Loader = new Loader();
-
 let game: Game;
 
 AssetLoader.loadWith('./assets/assets.json', (loaders) => {
@@ -25,9 +20,9 @@ AssetLoader.loadWith('./assets/assets.json', (loaders) => {
     game = new Game();
     app.stage.addChild(game);
     resize();
-    app.ticker.add(() => {
-      // game.render()
-    });
+    // app.ticker.add(() => {
+    //   // game.render()
+    // });
     app.start();
   });
 });

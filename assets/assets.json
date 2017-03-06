@@ -5,7 +5,12 @@
     "background": "./assets/background/11_background.png"
   },
   "all":{
-    "panel":"./assets/panel.png",
+    "button_blue":"./assets/button/blue.png",
+    "button_green":"./assets/button/green.png",
+    "button_grey":"./assets/button/grey.png",
+    "button_orange":"./assets/button/orange.png",
+    "panel_background":"./assets/panel/background.png",
+    "panel_foreground":"./assets/panel/foreground.png",
     "ground":"./assets/background/01_ground.png",
     "trees_and_bushes":"./assets/background/02_trees_and_bushes.png",
     "distant_trees":"./assets/background/03_distant_trees.png",

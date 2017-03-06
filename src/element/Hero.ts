@@ -26,4 +26,8 @@ export default class Hero extends Container {
     this.spine.state.setAnimation(0, 'walk', true);
   }
 
+  idle() {
+    this.spine.state.setAnimation(0, 'idle', false);
+  }
+
 }

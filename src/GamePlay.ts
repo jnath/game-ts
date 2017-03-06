@@ -1,6 +1,6 @@
 
-import { Container, Sprite, Texture, extras } from 'pixi.js';
-
+import { Container, Sprite, Texture, extras, ticker } from 'pixi.js';
+import Ticker = ticker.Ticker;
 import Parallax from './component/Parallax';
 
 import AssetLoader, { Loader } from './process/AssetLoader';
@@ -14,8 +14,14 @@ export default class GamePlay extends Container {
 
   hero: Hero;
 
+  ticker: Ticker;
+  impulse: number = 0;
+
   constructor() {
     super();
+
+    this.ticker = new Ticker();
+    this.ticker.add(this.tick.bind(this));
 
     this.parallax = new Parallax();
     this.parallax.add(Texture.fromImage('distant_clouds1'));
@@ -34,6 +40,38 @@ export default class GamePlay extends Container {
     this.hero.x = (this.width - this.hero.width ) / 2;
     this.hero.y = this.height - this.hero.height;
     this.addChild(this.hero);
+
+  }
+
+  start() {
+    this.ticker.start();
+    this.hero.walk();
+  }
+
+  stop() {
+    this.ticker.stop();
+    this.hero.idle();
+  }
+
+  private tick() {
+    if (!this.hero) {
+      return;
+    }
+    this.parallax.move -= 3 + this.impulse;
+    this.hero.x = ( this.width - this.hero.width ) / 2;
+    if ( this.hero.y < this.height - 90) {
+      this.hero.y += 9.8;
+    }
+    this.hero.y -= this.impulse;
+    if (this.impulse > 0) {
+      this.impulse *= 0.98;
+      if (this.hero.y >= this.height - 90) {
+        this.impulse = 0;
+      }
+    }
+    // if (this.hero.y >= this.height - 90) {
+    //   this.hero.walk();
+    // }
   }
 
 }

@@ -4,24 +4,20 @@ import Layout, { Dock } from './Layout';
 
 export default class Scale9Grid extends Layout {
 
-  private _tl:Sprite;
-  private _tc:Sprite;
-  private _tr:Sprite;
+  private _tl: Sprite;
+  private _tc: Sprite;
+  private _tr: Sprite;
 
-  private _ml:Sprite;
-  private _mc:Sprite;
-  private _mr:Sprite;
+  private _ml: Sprite;
+  private _mc: Sprite;
+  private _mr: Sprite;
 
-  private _bl:Sprite;
-  private _bc:Sprite;
-  private _br:Sprite;
+  private _bl: Sprite;
+  private _bc: Sprite;
+  private _br: Sprite;
 
-  public fixMinSize: boolean;
-
-  constructor(texture: Texture, grid9?: Rectangle, fixMinSize: boolean = true) {
+  constructor(texture: Texture, grid9?: Rectangle) {
     super();
-
-    this.fixMinSize = fixMinSize;
 
     grid9 = grid9 ? grid9 : new Rectangle(10, 10, texture.width - 20, texture.height - 20);
 
@@ -90,4 +86,5 @@ export default class Scale9Grid extends Layout {
     return new Texture(texture.baseTexture, rect, rect, trim);
 
   }
+
 }
