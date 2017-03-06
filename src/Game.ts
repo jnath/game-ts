@@ -9,7 +9,7 @@ import AssetLoader, { Loader } from './process/AssetLoader';
 import Layout, { Dock } from './ui/Layout';
 import ProgressBar from './ui/ProgressBar';
 import Padding from './ui/Padding';
-import Panel from './ui/Panel';
+import Intro from './element/Intro';
 import Parallax from './component/Parallax';
 import Position from './process/Position';
 import GamePlay from './GamePlay';
@@ -23,12 +23,6 @@ export default class Game extends Layout {
   progress: ProgressBar;
   background: Sprite;
   gamePlay: GamePlay;
-
-  // parallax: Parallax;
-
-  // hero: Spine;
-
-  // impulse: number = 0;
 
   constructor() {
     super();
@@ -48,50 +42,23 @@ export default class Game extends Layout {
     this.load('all', () => {
       this.gamePlay = new GamePlay();
       this.addChild(this.gamePlay);
+      this.gamePlay.start();
       this.on('resize', () => Position.cover(this, this.gamePlay));
       Position.cover(this, this.gamePlay);
 
-      // let spineData: SkeletonData = AssetLoader.get('all').resources['spineboy']['spineData'];
-      // this.hero = new Spine(spineData);
-      // // this.hero.dock = Dock.CENTER | Dock.BOTTOM;
-      // this.hero.scale.set(.2);
-      // this.hero.state.setAnimation(0, 'walk', true);
 
-      // this.addChild(this.hero);
-      // this.on('pointerdown', () => {
-      //     this.hero.state.setAnimation(0, 'jump', true);
-      //     this.impulse += 25;
-      // });
-      let panel: Panel = new Panel(Texture.fromImage('panel'));
-      panel.dockPivot(panel.width / 2, panel.height / 2);
+      let panel: Intro = new Intro();
       panel.dock = Dock.CENTER | Dock.MIDDLE;
+      panel.width = this.width / 3 * 2;
+      panel.height =  this.height / 3 * 2;
       this.addChild(panel);
-      gsap.from(panel, 1, { scaleXY: 0, ease: Elastic.easeOut.config(1, 0.3) });
+      this.on('resize', () => {
+        gsap.to(panel, 1, { width: this.width / 3 * 2, height: this.height / 3 * 2, ease: Elastic.easeOut.config(1, 0.3) });
+      });
     });
 
     this.on('resize', () => Position.cover(this, this.background));
   }
-
-  // render() {
-  //   if (!this.hero) {
-  //     return;
-  //   }
-  //   this.parallax.move -= 3 + this.impulse;
-  //   this.hero.x = ( this.width - this.hero.width ) / 2;
-  //   if ( this.hero.y < this.height - 90) {
-  //     this.hero.y += 9.8;
-  //   }
-  //   this.hero.y -= this.impulse;
-  //   if (this.impulse > 0) {
-  //     this.impulse *= 0.98;
-  //     if (this.hero.y >= this.height - 90) {
-  //       this.impulse = 0;
-  //     }
-  //   }
-  //   if(this.hero.y >= this.height - 90) {
-  //     this.hero.state.addAnimation(0, 'walk', true, 0);
-  //   }
-  // }
 
   load(cathName: string, cb: () => void) {
     let loader: Loader = AssetLoader.get(cathName);
