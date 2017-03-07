@@ -46,7 +46,6 @@ export default class Game extends Layout {
       this.on('resize', () => Position.cover(this, this.gamePlay));
       Position.cover(this, this.gamePlay);
 
-
       let panel: Intro = new Intro();
       panel.dock = Dock.CENTER | Dock.MIDDLE;
       panel.width = this.width / 3 * 2;

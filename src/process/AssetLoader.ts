@@ -35,7 +35,19 @@ export default class AssetLoader extends EventEmitter {
       Object.keys(assetList).forEach((cathName: string) => {
         let loader: Loader = new Loader();
         Object.keys(assetList[cathName]).forEach((name: string) => {
-          loader.add(name, assetList[cathName][name]);
+          let url: string = assetList[cathName][name];
+          loader.add(name, url);
+        });
+        loader.use((ressource: Resource, next: () => void) => {
+          let ext: string = ressource.url.split('/').pop().split('.')[1];
+          if (ext === 'css') {
+            let newStyle = document.createElement('style');
+            newStyle.appendChild(document.createTextNode(ressource.data));
+            document.head.appendChild(newStyle);
+          }
+          setTimeout(() => {
+            next();
+          }, 1000);
         });
         AssetLoader.loaders[cathName] = loader;
       });

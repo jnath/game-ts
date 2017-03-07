@@ -2,6 +2,7 @@ import { Texture, Container, utils, extras, Text, ITextStyleStyle, TextStyle } f
 import EventEmitter = utils.EventEmitter;
 import AnimatedSprite = extras.AnimatedSprite;
 import Scale9Grid from './Scale9Grid';
+import Layout, { Dock } from './Layout';
 
 export interface StatContent {
   background: Scale9Grid;
@@ -27,16 +28,13 @@ export enum Stat {
   disabled,
 }
 
-export default class Button extends Container {
+export default class Button extends Layout {
 
   private stats: Stats = <any>{};
 
   private currentStat: Stat;
   private _stat: Stat;
   private _disabled: boolean;
-
-  private _width: number = 0;
-  private _height: number = 0;
 
   private textfield: Text;
   private _text: string;
@@ -47,6 +45,7 @@ export default class Button extends Container {
     super();
 
     this.stats = stats;
+    this._defaultTextStyle = this.stats[Stat[Stat.default]].textStyle;
 
     this.interactive = true;
     this.buttonMode = true;
@@ -64,6 +63,15 @@ export default class Button extends Container {
     }
 
     this.stat = Stat.default;
+    this.on('resize', () => this.onResize());
+    this.resize(this.stats[Stat[Stat.default]].background.width, this.stats[Stat[Stat.default]].background.height);
+  }
+
+  onResize() {
+    for (let key in this.stats ) {
+      this.stats[key].background.width = this._width;
+      this.stats[key].background.height = this._height;
+    }
   }
 
   get defaultTextStyle(): ITextStyleStyle { return this._defaultTextStyle; }
@@ -78,6 +86,7 @@ export default class Button extends Container {
       this.addTextField();
     }
     this.textfield.text = this._text;
+    this.emit('updatePosition');
   }
 
   get disabled(): boolean { return this._disabled; }
@@ -93,12 +102,13 @@ export default class Button extends Container {
   }
 
   private setStat(stat: Stat) {
+    let lastStat: Stat = stat;
     if (this.currentStat === stat) {
       return;
     }
 
     if (this.stats[Stat[this.currentStat]]) {
-      this.stats[this.currentStat].background.visible = false;
+      this.stats[Stat[this.currentStat]].background.visible = false;
     }
 
     this.currentStat = stat;
@@ -111,36 +121,23 @@ export default class Button extends Container {
     if (this.stats[Stat[this.currentStat]].textStyle && !this.textfield) {
       this.addTextField();
     }
-
     this.textfield.style = new TextStyle(Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle));
+    this.emit('updatePosition');
+    this.emit('updateStat', { lastStat, currentStat: this.currentStat });
   }
 
   private addTextField() {
-    this.textfield = new Text();
+    this.textfield = new Text('', this.defaultTextStyle);
+    this.textfield.dock = Dock.CENTER | Dock.MIDDLE;
     this.addChild(this.textfield);
+
   }
 
   add(stat: Stat, texture: Scale9Grid, textStyle?: TextStyle) {
     texture.visible = false;
-    this.stats[stat].background = texture;
-    this.stats[stat].textStyle = textStyle;
+    this.stats[Stat[stat]].background = texture;
+    this.stats[Stat[stat]].textStyle = textStyle;
     this.addChild(texture);
-  }
-
-  get width(): number { return this._width; }
-  set width(value: number) {
-    this._width = value;
-    for (let key in this.stats ) {
-      this.stats[key].background.width = this._width;
-    }
-  }
-
-  get height(): number { return this._height; }
-  set height(value: number) {
-    this._height = value;
-    for (let key in this.stats ) {
-      this.stats[key].background.height = this._height;
-    }
   }
 
 }
