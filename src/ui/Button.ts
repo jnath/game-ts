@@ -2,6 +2,7 @@ import { Texture, Container, utils, extras, Text, ITextStyleStyle, TextStyle } f
 import EventEmitter = utils.EventEmitter;
 import AnimatedSprite = extras.AnimatedSprite;
 import Scale9Grid from './Scale9Grid';
+import Padding from './Padding';
 import Layout, { Dock } from './Layout';
 
 export interface StatContent {
@@ -14,7 +15,7 @@ export interface Stats {
   default: StatContent;
   down?: StatContent;
   up?: StatContent;
-  hover?: StatContent;
+  over?: StatContent;
   out?: StatContent;
   disabled?: StatContent;
 }
@@ -23,7 +24,7 @@ export enum Stat {
   default,
   down,
   up,
-  hover,
+  over,
   out,
   disabled,
 }
@@ -41,17 +42,20 @@ export default class Button extends Layout {
 
   private _defaultTextStyle: ITextStyleStyle = {};
 
-  constructor(stats: Stats) {
+  private _padding: Padding = new Padding(20, 20, 20, 20);
+
+  constructor(stats: Stats, padding?: Padding) {
     super();
 
     this.stats = stats;
     this._defaultTextStyle = this.stats[Stat[Stat.default]].textStyle;
+    this._padding = padding || this._padding;
 
     this.interactive = true;
     this.buttonMode = true;
     this.on('mousedown', () => this.stat = Stat.down );
     this.on('mouseup', () => this.stat = Stat.up );
-    this.on('mouseover', () => this.stat = Stat.hover );
+    this.on('mouseover', () => this.stat = Stat.over );
     this.on('mouseout', () => this.stat = Stat.out );
 
     for (let key in this.stats ) {
@@ -64,7 +68,6 @@ export default class Button extends Layout {
 
     this.stat = Stat.default;
     this.on('resize', () => this.onResize());
-    this.resize(this.stats[Stat[Stat.default]].background.width, this.stats[Stat[Stat.default]].background.height);
   }
 
   onResize() {
@@ -85,8 +88,15 @@ export default class Button extends Layout {
     if (!this.textfield) {
       this.addTextField();
     }
+    this.textfield.texture.baseTexture.once('update', () => this.updateResize());
     this.textfield.text = this._text;
-    this.emit('updatePosition');
+  }
+
+  private updateResize() {
+    this.resize(
+      this.textfield.width + this._padding.left + this._padding.right,
+      this.textfield.height + this._padding.top + this._padding.bottom
+    );
   }
 
   get disabled(): boolean { return this._disabled; }
@@ -121,16 +131,15 @@ export default class Button extends Layout {
     if (this.stats[Stat[this.currentStat]].textStyle && !this.textfield) {
       this.addTextField();
     }
+    this.textfield.texture.baseTexture.once('update', () => this.updateResize());
     this.textfield.style = new TextStyle(Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle));
-    this.emit('updatePosition');
     this.emit('updateStat', { lastStat, currentStat: this.currentStat });
   }
 
   private addTextField() {
-    this.textfield = new Text('', this.defaultTextStyle);
+    this.textfield = new Text(' ', Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle));
     this.textfield.dock = Dock.CENTER | Dock.MIDDLE;
     this.addChild(this.textfield);
-
   }
 
   add(stat: Stat, texture: Scale9Grid, textStyle?: TextStyle) {

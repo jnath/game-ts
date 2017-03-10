@@ -41,34 +41,43 @@ export default class Layout extends Container {
     this.onChildrenChange = () => this.childPositioning();
   }
 
+  protected childDock(child: Container) {
+    if ((child.dock & Dock.NONE) === Dock.NONE) {
+      return;
+    }
+    if ((child.dock & Dock.TOP) === Dock.TOP) {
+      child.y = 0;
+    }
+    if ((child.dock & Dock.BOTTOM) === Dock.BOTTOM) {
+      child.y = ( this._height * this._scaleY ) - ( child.height || 0 );
+    }
+    if ((child.dock & Dock.LEFT) === Dock.LEFT) {
+      child.x = 0;
+    }
+    if ((child.dock & Dock.RIGHT) === Dock.RIGHT) {
+      child.x = ( this._width * this._scaleX ) - ( child.width || 0 );
+    }
+    if ((child.dock & Dock.CENTER) === Dock.CENTER) {
+      child.x = ( ( this._width * this._scaleX ) - ( child.width || 0 ) ) / 2 ;
+    }
+    if ((child.dock & Dock.MIDDLE) === Dock.MIDDLE) {
+      child.y = ( ( this._height * this._scaleY ) - ( child.height || 0 ) ) / 2 ;
+    }
+
+    child.x += child.dockX || 0;
+    child.y += child.dockY || 0;
+  }
+
   protected childPositioning() {
     this.emit('resize');
-    this.children.forEach((child: Container) => {
-      if ((child.dock & Dock.NONE) === Dock.NONE) {
-        return;
+    this.children.forEach((child: Container) =>{
+      if (child.name === "BtnPlay") {
+        // console.log("dock before", child.x, child.y, this._width, this._height, this._scaleX, this._scaleY, child.height, child.width, child.dockX, child.dockY);
       }
-      if ((child.dock & Dock.TOP) === Dock.TOP) {
-        child.y = 0;
+      this.childDock(child);
+      if (child.name === "BtnPlay") {
+        // console.log("dock after", child.x, child.y, this._width, this._height, this._scaleX, this._scaleY, child.height, child.width, child.dockX, child.dockY);
       }
-      if ((child.dock & Dock.BOTTOM) === Dock.BOTTOM) {
-        child.y = ( this._height * this._scaleY ) - child.height;
-      }
-      if ((child.dock & Dock.LEFT) === Dock.LEFT) {
-        child.x = 0;
-      }
-      if ((child.dock & Dock.RIGHT) === Dock.RIGHT) {
-        child.x = ( this._width * this._scaleX ) - child.width;
-      }
-      if ((child.dock & Dock.CENTER) === Dock.CENTER) {
-        child.x = ( ( this._width * this._scaleX ) - child.width ) / 2 ;
-      }
-      if ((child.dock & Dock.MIDDLE) === Dock.MIDDLE) {
-        child.y = ( ( this._height * this._scaleY ) - child.height ) / 2 ;
-      }
-
-      child.x += child.dockX || 0;
-      child.y += child.dockY || 0;
-
     });
   }
 

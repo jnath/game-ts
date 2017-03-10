@@ -42,12 +42,15 @@ export default class AssetLoader extends EventEmitter {
           let ext: string = ressource.url.split('/').pop().split('.')[1];
           if (ext === 'css') {
             let newStyle = document.createElement('style');
+            newStyle.onload = () => {
+              console.log("CSS LOADED");
+              next();
+            };
             newStyle.appendChild(document.createTextNode(ressource.data));
             document.head.appendChild(newStyle);
+            return;
           }
-          setTimeout(() => {
-            next();
-          }, 1000);
+          next();
         });
         AssetLoader.loaders[cathName] = loader;
       });

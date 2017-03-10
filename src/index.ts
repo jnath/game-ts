@@ -1,10 +1,30 @@
-import { Application } from 'pixi.js';
+import { Application, Container, Graphics } from 'pixi.js';
 import 'pixi-spine';
 
 import './display/Container';
 
 import Game from './Game';
 import AssetLoader from './process/AssetLoader';
+
+
+
+declare global {
+    interface Window {
+        debug: (ctn: Container) => void;
+    }
+}
+(<any>window).debug = (ctn: Container) => {
+  if (!ctn['debug_gf']) {
+    ctn['debug_gf'] = new Graphics();
+    ctn.addChild(ctn['debug_gf']);
+  }
+  let gf: Graphics = ctn['debug_gf'];
+  gf.clear();
+  gf.beginFill(0x000000, 0);
+  gf.lineStyle(1, 0xFF0000, 1);
+  gf.drawRect(0, 0, ctn.width, ctn.height);
+  gf.endFill();
+};
 
 // Create the application
 const app: Application = new Application();
