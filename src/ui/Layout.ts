@@ -41,7 +41,7 @@ export default class Layout extends Container {
     this.onChildrenChange = () => this.childPositioning();
   }
 
-  protected childDock(child: Container) {
+  childDock(child: Container) {
     if ((child.dock & Dock.NONE) === Dock.NONE) {
       return;
     }
@@ -71,14 +71,13 @@ export default class Layout extends Container {
   protected childPositioning() {
     this.emit('resize');
     this.children.forEach((child: Container) =>{
-      if (child.name === "BtnPlay") {
-        // console.log("dock before", child.x, child.y, this._width, this._height, this._scaleX, this._scaleY, child.height, child.width, child.dockX, child.dockY);
-      }
       this.childDock(child);
-      if (child.name === "BtnPlay") {
-        // console.log("dock after", child.x, child.y, this._width, this._height, this._scaleX, this._scaleY, child.height, child.width, child.dockX, child.dockY);
-      }
     });
+    
+    if (this.parent instanceof Layout) {
+      let parent: Layout = this.parent;
+      parent.childDock(this);
+    }
   }
 
   resize(width: number, height: number) {
