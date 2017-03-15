@@ -16,10 +16,9 @@ export default class Panel extends Layout {
     this.foreground = new Scale9Grid(foreground, new Rectangle(20, 20, background.width - 40, background.height - 40));
     this.addChild(this.foreground);
 
-    this._width = Math.max(this.background.width, this.foreground.width);
-    this._height = Math.max(this.background.height, this.foreground.height);
 
     this.on('resize', () => this.onResize());
+    this.resize(Math.max(this.background.width, this.foreground.width), Math.max(this.background.height, this.foreground.height));
   }
 
   onResize() {

@@ -48,7 +48,6 @@ export default class BtnPlay extends Button {
       }
     });
 
-    this.name = "BtnPlay";
     this.text = 'Play';
 
   }

@@ -26,6 +26,32 @@ Container.prototype.dockPivot = function(x: number, y: number){
   this.dockY = this.pivot.y;
 };
 
+// Container.prototype['_dockX'] = 0;
+// Object.defineProperty(Container.prototype, 'dockX', {
+//     get: function () { return this._dockX; },
+//     set: function (value) {
+//         this._dockX = value;
+//         if (this.parent && this.parent.childDock){
+//           this.parent.childDock(this);
+//         }
+//     },
+//     enumerable: true,
+//     configurable: true
+// });
+
+// Container.prototype['_dockY'] = 0;
+// Object.defineProperty(Container.prototype, 'dockY', {
+//     get: function () { return this._dockX; },
+//     set: function (value) {
+//         this._dockY = value;
+//         if (this.parent && this.parent.childDock){
+//           this.parent.childDock(this);
+//         }
+//     },
+//     enumerable: true,
+//     configurable: true
+// });
+
 export default class Layout extends Container {
 
   protected _width: number;
@@ -70,15 +96,10 @@ export default class Layout extends Container {
 
   protected childPositioning() {
     this.emit('resize');
-    this.children.forEach((child: Container) =>{
-      if (child.name === "BtnPlay") {
-        // console.log("dock before", child.x, child.y, this._width, this._height, this._scaleX, this._scaleY, child.height, child.width, child.dockX, child.dockY);
-      }
-      this.childDock(child);
-      if (child.name === "BtnPlay") {
-        // console.log("dock after", child.x, child.y, this._width, this._height, this._scaleX, this._scaleY, child.height, child.width, child.dockX, child.dockY);
-      }
-    });
+    this.children.forEach((child: Container) => this.childDock(child));
+    if (this.parent && this.parent instanceof Layout) {
+      this.parent.childDock(this);
+    }
   }
 
   resize(width: number, height: number) {

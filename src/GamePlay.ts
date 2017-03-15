@@ -17,6 +17,8 @@ export default class GamePlay extends Container {
   ticker: Ticker;
   impulse: number = 0;
 
+  floor: number = 350;
+
   constructor() {
     super();
 
@@ -37,7 +39,7 @@ export default class GamePlay extends Container {
     this.addChild(this.parallax);
 
     this.hero = new Hero();
-    this.hero.x = (this.width - this.hero.width ) / 2;
+    this.hero.x = - this.hero.width;
     this.hero.y = this.height - this.hero.height;
     this.addChild(this.hero);
 
@@ -59,13 +61,16 @@ export default class GamePlay extends Container {
     }
     this.parallax.move -= 3 + this.impulse;
     this.hero.x = ( this.width - this.hero.width ) / 2;
-    if ( this.hero.y < this.height - 90) {
+    if ( this.hero.y < this.parallax.height - this.floor) {
       this.hero.y += 9.8;
+    }else if (this.hero.y > this.parallax.height - this.floor) {
+      this.hero.y = this.parallax.height - this.floor;
+      this.hero.walk();
     }
     this.hero.y -= this.impulse;
     if (this.impulse > 0) {
       this.impulse *= 0.98;
-      if (this.hero.y >= this.height - 90) {
+      if (this.hero.y >= this.parallax.height - this.floor) {
         this.impulse = 0;
       }
     }

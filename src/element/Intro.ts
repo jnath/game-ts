@@ -4,8 +4,6 @@ import Panel from '../ui/Panel';
 import BtnPlay from './btn/BtnPlay';
 import Scale9Grid from '../ui/Scale9Grid';
 import { Dock } from '../ui/Layout';
-// import Itg from 'Itg';
-// import Motors from 'Motors';
 
 export default class Intro extends Panel {
 
@@ -18,24 +16,17 @@ export default class Intro extends Panel {
     let defaultBgTextureBtn: Texture = Texture.fromImage('button_blue');
 
     this.playButton = new BtnPlay();
-    console.log(this.playButton.x, this.playButton.y);
     this.playButton.dock = Dock.BOTTOM | Dock.CENTER;
-    console.log(this.playButton.x, this.playButton.y);
+    this.playButton.dockY = -20;
     this.addChild(this.playButton);
-    console.log(this.playButton.x, this.playButton.y);
 
-    this.playButton.on('click', () => {
-      // Itg.bet((ticket: Ticket)=>{
-      //   ticket
-      // })
-      // Motors.bet(()=>{
+    this.playButton.on('click', this.click.bind(this));
+    this.playButton.on('tap', this.click.bind(this));
 
-      // })
-      // Motors.execute('step', (data:Datas)=>{
+  }
 
-      // })
-    });
-
+  private click() {
+    this.emit('play');
   }
 
 }
