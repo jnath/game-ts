@@ -53,12 +53,12 @@ export default class Button extends Layout {
 
     this.interactive = true;
     this.buttonMode = true;
-    this.on('mousedown', () => this.stat = Stat.down );
-    this.on('mouseup', () => this.stat = Stat.up );
-    this.on('mouseover', () => this.stat = Stat.over );
-    this.on('mouseout', () => this.stat = Stat.out );
+    this.on('mousedown', () => this.stat = Stat.down);
+    this.on('mouseup', () => this.stat = Stat.up);
+    this.on('mouseover', () => this.stat = Stat.over);
+    this.on('mouseout', () => this.stat = Stat.out);
 
-    for (let key in this.stats ) {
+    for (let key in this.stats) {
       if (!this.stats[key]) {
         continue;
       }
@@ -71,10 +71,12 @@ export default class Button extends Layout {
   }
 
   onResize() {
-    for (let key in this.stats ) {
-      this.stats[key].background.width = this._width;
-      this.stats[key].background.height = this._height;
+    for (let key in this.stats) {
+      this.stats[key].background.width = this.width;
+      this.stats[key].background.height = this.height;
+      // this.stats[key].background.scaleXY = this.scaleXY;
     }
+    // this.textfield.scaleXY = this.scaleXY;
   }
 
   get defaultTextStyle(): ITextStyleStyle { return this._defaultTextStyle; }

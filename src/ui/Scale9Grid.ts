@@ -1,4 +1,4 @@
-import { Sprite, Texture, Rectangle } from 'pixi.js';
+import { Sprite, Texture, Rectangle, Graphics } from 'pixi.js';
 
 import Layout, { Dock } from './Layout';
 
@@ -16,11 +16,12 @@ export default class Scale9Grid extends Layout {
   private _bc: Sprite;
   private _br: Sprite;
 
+  private masker: Graphics = new Graphics();
+
   constructor(texture: Texture, grid9?: Rectangle) {
     super();
 
     grid9 = grid9 ? grid9 : new Rectangle(10, 10, texture.width - 20, texture.height - 20);
-
 
     let frameTl: Rectangle = new Rectangle(0, 0, grid9.top, grid9.left);
     this._tl = new Sprite(this.crop(texture, frameTl));
@@ -66,25 +67,41 @@ export default class Scale9Grid extends Layout {
     this._mc.dock = Dock.MIDDLE | Dock.CENTER;
     this.addChild(this._mc);
 
+    this.addChild(this.masker);
+    this.mask = this.masker;
+
     this.on('resize', () => this.resizeHandler());
     this.resize(texture.width, texture.height);
 
   }
 
   private resizeHandler() {
-    this._tc.width = ( this._width * this._scaleX ) - ( this._tl.width + this._tr.width);
-    this._bc.width = ( this.width * this._scaleX ) - ( this._bl.width + this._br.width);
-    this._ml.height = ( this.height * this._scaleY ) - (this._tl.height + this._bl.height);
-    this._mr.height = ( this.height * this._scaleY ) - ( this._tr.height + this._br.height);
+    // this._tc.width = (this._width * this._scaleX) - (this._tl.width + this._tr.width);
+    // this._bc.width = (this.width * this._scaleX) - (this._bl.width + this._br.width);
+    // this._ml.height = (this.height * this._scaleY) - (this._tl.height + this._bl.height);
+    // this._mr.height = (this.height * this._scaleY) - (this._tr.height + this._br.height);
 
-    this._mc.width = ( this.width * this._scaleX ) - ( this._ml.width + this._mr.width );
-    this._mc.height = ( this.height * this._scaleY ) - ( this._tc.height + this._bc.height);
+    // this._mc.width = (this.width * this._scaleX) - (this._ml.width + this._mr.width);
+    // this._mc.height = (this.height * this._scaleY) - (this._tc.height + this._bc.height);
+
+    this._tc.width = this._width - (this._tl.width + this._tr.width);
+    this._bc.width = this.width - (this._bl.width + this._br.width);
+    this._ml.height = this.height - (this._tl.height + this._bl.height);
+    this._mr.height = this.height - (this._tr.height + this._br.height);
+
+    this._mc.width = this.width - (this._ml.width + this._mr.width);
+    this._mc.height = this.height - (this._tc.height + this._bc.height);
+
+    this.masker.clear();
+    this.masker.beginFill(0x000000, 1);
+    this.masker.drawRect(0, 0, this.width, this.height);
+    this.masker.endFill();
+
   }
 
   private crop(texture: Texture, rect: Rectangle): Texture {
     let trim: Rectangle = new Rectangle(0, 0, rect.width, rect.height);
     return new Texture(texture.baseTexture, rect, rect, trim);
-
   }
 
 }

@@ -28,6 +28,11 @@ export default class Panel extends Layout {
 
     this.background.width = this._width;
     this.background.height = this._height;
+
+    // this.children.forEach((child: Container) => {
+    //   child.scaleX = this.scaleX;
+    //   child.scaleY = this.scaleY;
+    // });
   }
 
 }

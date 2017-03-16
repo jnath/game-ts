@@ -4,8 +4,6 @@ import Panel from '../ui/Panel';
 import BtnPlay from './btn/BtnPlay';
 import Scale9Grid from '../ui/Scale9Grid';
 import { Dock } from '../ui/Layout';
-// import Itg from 'Itg';
-// import Motors from 'Motors';
 
 export default class Intro extends Panel {
 
@@ -22,17 +20,7 @@ export default class Intro extends Panel {
     this.playButton.dockY = -20;
     this.addChild(this.playButton);
 
-    this.playButton.on('click', () => {
-      // Itg.bet((ticket: Ticket)=>{
-      //   ticket
-      // })
-      // Motors.bet(()=>{
-
-      // })
-      // Motors.execute('step', (data:Datas)=>{
-
-      // })
-    });
+    this.playButton.on('click', () => this.emit('play'));
 
   }
 
