@@ -15,6 +15,8 @@ import Position from './process/Position';
 import GamePlay from './GamePlay';
 import StateManager, { MiddlewareData } from './StateManager';
 
+import TextField from './ui/TextField';
+
 import gsap from 'gsap';
 
 declare var Elastic: any;
@@ -83,7 +85,14 @@ export default class Game extends Layout {
 
       StateManager.getInstance().start(() => {
         console.log('start complete');
+        let textField: TextField = new TextField('Hello World', {
+          fontSize: 40,
+          fontName: 'KomikaAxis'
+        });
+
+        this.addChild(textField);
       });
+
 
     });
 

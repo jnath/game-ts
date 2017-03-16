@@ -5,7 +5,7 @@
     "background": "./assets/background/11_background.png"
   },
   "all":{
-    "KOMIKAX":"./assets/font/KOMIKAX_.css",
+    "KOMIKAX":"./assets/font/KOMIKAX_.ttf",
     "button_blue":"./assets/button/blue.png",
     "button_green":"./assets/button/green.png",
     "button_grey":"./assets/button/grey.png",
