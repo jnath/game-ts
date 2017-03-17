@@ -1,5 +1,5 @@
 
-import { Container, Sprite, Texture, extras } from 'pixi.js';
+import { Container, Sprite, Texture, extras, Graphics } from 'pixi.js';
 
 import Spine = PIXI.spine.Spine;
 import SkeletonData = PIXI.spine.core.SkeletonData;
@@ -91,6 +91,22 @@ export default class Game extends Layout {
         });
 
         this.addChild(textField);
+
+        let gf: Graphics = new Graphics();
+        let i: number = 0;
+        setInterval(() => {
+          textField.text = `Hello ${i}`;
+          i++;
+        }, 1000);
+
+        setInterval(() => {
+          gf.clear();
+          gf.beginFill(0xFF0000, .5);
+          gf.drawRect(textField.x, textField.y, textField.width, textField.height);
+          gf.endFill();
+        }, 100);
+
+        this.addChild(gf);
       });
 
 

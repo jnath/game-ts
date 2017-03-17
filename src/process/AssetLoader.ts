@@ -68,16 +68,6 @@ export default class AssetLoader extends EventEmitter {
             });
             return;
           }
-          // if (ext === 'css') {
-          //   let newStyle = document.createElement('style');
-          //   newStyle.onload = () => {
-          //     console.log("CSS LOADED");
-          //     next();
-          //   };
-          //   newStyle.appendChild(document.createTextNode(ressource.data));
-          //   document.head.appendChild(newStyle);
-          //   return;
-          // }
           next();
         });
         AssetLoader.loaders[cathName] = loader;
