@@ -1,9 +1,9 @@
 
 import { Sprite, Texture, Graphics } from 'pixi.js';
-import { Font, FontOptions, RenderOptions, BoundingBox } from 'opentype.js';
+import { Font, FontOptions, RenderOptions, BoundingBox, Glyph } from 'opentype.js';
 import AssetLoader from '../process/AssetLoader';
 
-import TagsMapper from './tools/TagsMapper';
+import TagsMapper, { GlyphData } from './tools/TagsMapper';
 
 declare module 'opentype.js' {
   export interface BoundingBox {
@@ -93,6 +93,11 @@ export default class TextField extends Sprite {
 
   updateText() {
     let metrics = this.tagsMapper.compute();
+    this._canvas.width = metrics.width;
+    this._canvas.height = metrics.height;
+    metrics.glyphs.forEach((glyph: GlyphData) => {
+      glyph.data.draw(this._context, glyph.position[0], glyph.position[1], this._style.fontSize * 10);
+    });
     console.log(metrics);
   }
 

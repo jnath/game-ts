@@ -17,8 +17,16 @@ export interface TagsMapperOpts extends WordWrapperOpts {
   lineHeight?: number;
 }
 
+export interface GlyphData {
+  position: { x: number, y: number };
+  data: Glyph;
+  index: number;
+  column: number;
+  row: number;
+}
+
 export interface Layout {
-  glyphs: Array<Glyph>;
+  glyphs: Array<GlyphData>;
   baseline: number;
   leading: number;
   lines: Array<Line>;
@@ -79,7 +87,7 @@ export default class TagsMapper {
     let y = -font.ascender - L / 2;
     let totalHeight = (AD + L) * lines.length;
     let preferredWidth = isFinite(width) ? width : maxLineWidth;
-    let glyphs = [];
+    let glyphs: Array<GlyphData> = [];
     let lastGlyph = null;
 
     // Layout by line
@@ -97,7 +105,7 @@ export default class TagsMapper {
         // TODO:
         // Align center & right are off by a couple pixels, need to revisit.
         if (j === start && align === Align.RIGHT) {
-          x -= glyph.leftSideBearing;
+          x -= glyph.getMetrics().leftSideBearing;
         }
 
         // Apply kerning
@@ -115,7 +123,7 @@ export default class TagsMapper {
 
         // Store glyph data
         glyphs.push({
-          position: [x + tx, y],
+          position: { x: x + tx, y: y },
           data: glyph,
           index: j,
           column: c,
@@ -184,11 +192,11 @@ export default class TagsMapper {
       }
 
       // determine if the new pen or width is above our limit
-      let xMax = glyph.xMax || 0;
-      let xMin = glyph.xMin || 0;
+      let xMax = glyph.getMetrics().xMax || 0;
+      let xMin = glyph.getMetrics().xMin || 0;
       let glyphWidth = xMax - xMin;
       let rsb = this.getRightSideBearing(glyph);
-      let newWidth = pen + glyph.leftSideBearing + glyphWidth + rsb;
+      let newWidth = pen + glyph.getMetrics().leftSideBearing + glyphWidth + rsb;
       if (newWidth > width) {
         break;
       }
@@ -212,7 +220,7 @@ export default class TagsMapper {
     return rsb;
   }
 
-  getGlyph(font, char) {
+  getGlyph(font: Font, char: string) {
     let isTab = char === '\t';
     return font.charToGlyph(isTab ? ' ' : char);
   }
