@@ -3,6 +3,7 @@ const newlineChar = '\n';
 const whitespace = /\s/;
 
 export enum Mode {
+  GREEDY,
   NO_WRAP,
   PRE
 }
@@ -30,12 +31,13 @@ export default class WordWrapper {
   private _text: string;
   private _opts: WordWrapperOpts;
 
-  constructor(text: string, opt: WordWrapperOpts) {
+  constructor(text: string, opts: WordWrapperOpts) {
     this._text = text;
-    this._opts = opt;
+    this._opts = opts;
+    console.log(this._opts);
   }
 
-  splitedText(breakLine: string = '\n') {
+  textWordWraped(breakLine: string = '\n') {
     let splite = this.lines();
     return splite.map((line) => {
       return this._text.substring(line.start, line.end);
@@ -104,8 +106,9 @@ export default class WordWrapper {
 
     let testWidth = width;
     // if Mode.NO_WRAP is specified, we only wrap on newline chars
-    if (mode === Mode.NO_WRAP)
+    if (mode === Mode.NO_WRAP) {
       testWidth = Number.MAX_VALUE;
+    }
 
     while (start < end && start < text.length) {
       // get next newline position

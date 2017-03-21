@@ -1,9 +1,12 @@
 
 import { Sprite, Texture, Graphics } from 'pixi.js';
-import { Font, FontOptions, RenderOptions, BoundingBox, Glyph } from 'opentype.js';
+import { Font, FontOptions, RenderOptions, BoundingBox, Glyph, Metrics, Path } from 'opentype.js';
 import AssetLoader from '../process/AssetLoader';
 
-import TagsMapper, { GlyphData } from './tools/TagsMapper';
+import ComputeLayout, { GlyphData, Mode } from './tools/ComputeLayout';
+// import WordWrapper, { WordWrapperOpts, Line, MeasureIterator } from './tools/WordWrapper';
+
+// Most browsers have a default font size of 16px
 
 declare module 'opentype.js' {
   export interface BoundingBox {
@@ -35,8 +38,7 @@ export interface TextStyle {
 export default class TextField extends Sprite {
 
   private _text: string;
-
-  // private _font: Font;
+  private _font: Font;
 
   private _canvas: HTMLCanvasElement;
   private _context: CanvasRenderingContext2D;
@@ -46,27 +48,28 @@ export default class TextField extends Sprite {
 
   private _baselineY: number;
   private _lineHeight: number;
-  private _font: Font;
 
   private resolution: number;
 
   private dirty: boolean;
 
-  private tagsMapper: TagsMapper;
+  private computeLayer: ComputeLayout;
+
+  private _wordWrap: boolean;
 
   styles: { [name: string]: TextStyle };
 
   constructor(text: string, style: TextStyle, rendererOptions?: RenderOptions, canvas?: HTMLCanvasElement) {
 
     canvas = canvas || document.createElement('canvas');
-    canvas.width = 300;
-    canvas.height = 300;
+    canvas.width = 3;
+    canvas.height = 3;
     const texture = Texture.fromCanvas(canvas);
 
     super(texture);
 
     this.resolution = 1;
-
+    this._wordWrap = false;
     this._text = text;
     this._rendererOptions = rendererOptions;
     this._style = style;
@@ -78,7 +81,7 @@ export default class TextField extends Sprite {
 
     this._font = AssetLoader.getFont(this._style.fontName);
 
-    this.tagsMapper = new TagsMapper(this._text, this._font);
+    this.computeLayer = new ComputeLayout(this._text, this._font, this._style.fontSize);
 
     this.updateText();
 
@@ -87,36 +90,64 @@ export default class TextField extends Sprite {
   get text(): string { return this._text; }
   set text(value: string) {
     this._text = value;
-    this.tagsMapper.text = this._text;
+    this.computeLayer.text = this._text;
     this.updateText();
   }
 
+  get width(): number { return this._width; }
+  set width(value: number) {
+    this._width = value;
+    if (this._wordWrap) {
+      this.updateText();
+    }
+  }
+
+  get wordWrap(): boolean { return this._wordWrap; }
+  set wordWrap(value: boolean) {
+    this._wordWrap = value;
+    if (this._wordWrap) {
+      this.updateText();
+    }
+  }
+
   updateText() {
-    let metrics = this.tagsMapper.compute();
-    this._canvas.width = metrics.width;
-    this._canvas.height = metrics.height;
-    metrics.glyphs.forEach((glyph: GlyphData) => {
-      glyph.data.draw(this._context, glyph.position[0], glyph.position[1], this._style.fontSize * 10);
+
+    let fontSizePx = this.computeLayer.getFontSizePx(this._font, this._style.fontSize);
+    let metrics = this.computeLayer.compute({
+      width: this.computeLayer.getEmUnits(this._font, fontSizePx, this.width),
+      mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY
     });
-    console.log(metrics);
+
+    this._width = this.computeLayer.getPxByUnit(metrics.width);
+    this._height = this.computeLayer.getPxByUnit(metrics.height);
+    this._canvas.width = this._width;
+    this._canvas.height = this._height;
+    metrics.glyphs.forEach((glyph: GlyphData) => {
+      glyph.data.draw(this._context,
+        this.computeLayer.getPxByUnit(glyph.position.x),
+        this.computeLayer.getPxByUnit(glyph.position.y),
+      this._style.fontSize);
+    });
+
   }
 
-  draw(text: string, style: TextStyle) {
 
-    let font: Font = this._font;
+  // draw(text: string, style: TextStyle) {
 
-    this._baselineY = font.ascender / font.unitsPerEm * style.fontSize;
-    let snapPath = font.getPath(this._text, 0, this._baselineY, style.fontSize, this._rendererOptions);
-    let boundingBox: BoundingBox = snapPath.getBoundingBox();
+  //   let font: Font = this._font;
 
-    let x: number = -boundingBox.x1;
-    let y: number = this._baselineY - boundingBox.y1;
+  //   this._baselineY = font.ascender / font.unitsPerEm * style.fontSize;
+  //   let snapPath = font.getPath(this._text, 0, this._baselineY, style.fontSize, this._rendererOptions);
+  //   let boundingBox: BoundingBox = snapPath.getBoundingBox();
 
-    this._canvas.width = Math.ceil(boundingBox.x2 - boundingBox.x1);
-    this._canvas.height = Math.ceil(boundingBox.y2 - boundingBox.y1);
+  //   let x: number = -boundingBox.x1;
+  //   let y: number = this._baselineY - boundingBox.y1;
 
-    font.draw(this._context, this._text, x, y, style.fontSize, this._rendererOptions);
-  }
+  //   this._canvas.width = Math.ceil(boundingBox.x2 - boundingBox.x1);
+  //   this._canvas.height = Math.ceil(boundingBox.y2 - boundingBox.y1);
+
+  //   font.draw(this._context, this._text, x, y, style.fontSize, this._rendererOptions);
+  // }
 
   /**
    * Updates texture size based on canvas size

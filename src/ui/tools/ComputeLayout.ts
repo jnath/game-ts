@@ -1,9 +1,12 @@
 
 import opentype, { Font, Glyph, Metrics } from 'opentype.js';
-import WordWrapper, { WordWrapperOpts, Line, MeasureIterator } from './WordWrapper';
+import WordWrapper, { Mode, WordWrapperOpts, Line, MeasureIterator } from './WordWrapper';
 
 // A default 'line-height' according to Chrome/FF/Safari (Jun 2016)
 const DEFAULT_LINE_HEIGHT = 1.175;
+const DEFAULT_PX_SIZE = 16;
+
+export { Mode };
 
 export enum Align {
   LEFT,
@@ -11,10 +14,12 @@ export enum Align {
   CENTER
 }
 
-export interface TagsMapperOpts extends WordWrapperOpts {
+export interface ComputeLayoutOpts {
   align?: Align;
   letterSpacing?: number;
   lineHeight?: number;
+  width: number;
+  mode?: Mode;
 }
 
 export interface GlyphData {
@@ -38,18 +43,19 @@ export interface Layout {
   height: number;
 }
 
-export default class TagsMapper {
+export default class ComputeLayout {
 
   wordWrapper: WordWrapper;
 
   _text: string;
   _font: Font;
-  _opts: TagsMapperOpts;
+  _fontSize: number;
+  _opts: ComputeLayoutOpts;
 
-  constructor(text: string, font: Font, opts: TagsMapperOpts = <any>{}) {
+  constructor(text: string, font: Font, fontSize: number) {
     this._text = text;
     this._font = font;
-    this._opts = opts;
+    this._fontSize = fontSize;
   }
 
   get text(): string { return this._text; }
@@ -57,10 +63,51 @@ export default class TagsMapper {
     this._text = value;
   }
 
-  compute(): Layout {
+  getFontSizePx(font: Font, value: number | string, dpi: number = 96) {
+    if (typeof value === 'number') return value;
+    if (typeof value !== 'string') throw new TypeError('Expected number or string for getFontPixelSize');
+    const parsed = this.parseUnit(value);
+    if (!parsed.unit || parsed.unit === 'px') {
+      return parsed.num;
+    }
 
+    if (parsed.unit === 'em') {
+      return parsed.num * DEFAULT_PX_SIZE;
+    } else if (parsed.unit === 'pt') {
+      return parsed.num * dpi / 72;
+    } else {
+      throw new TypeError('Unsupported unit for fontSize: ' + parsed.unit);
+    }
+  }
+
+  parseUnit(str): { num: number; unit: string; } {
+    let out = { num: 0, unit: '' };
+    str = String(str);
+    out.num = parseFloat(str);
+    out.unit = str.match(/[\d.\-\+]*\s*(.*)/)[1] || '';
+    return out;
+  }
+
+  getEmUnits(font: Font, fontSizePx: number, value: number | { num: number; unit: string; }) {
+
+    let parsed: { num: number; unit: string; } = typeof value === 'number' ? { num: value, unit: 'px', } : this.parseUnit(value);
+    if (parsed.unit === 'em') {
+      return parsed.num * font.unitsPerEm;
+    } else if (parsed.unit === 'px') {
+      let pxScale = 1 / font.unitsPerEm * fontSizePx;
+      return parsed.num / pxScale;
+    } else {
+      throw new Error('Invalid unit for getPixelSize: ' + parsed.unit);
+    }
+  }
+
+  getPxByUnit(value: number) {
+    return value / this._font.unitsPerEm * this._fontSize;
+  }
+
+  compute(opts: ComputeLayoutOpts = <any>{}): Layout {
+    this._opts = opts;
     let font: Font = this._font;
-    let opts: TagsMapperOpts = this._opts;
     let text: string = this._text;
     let align: Align = this._opts.align || Align.LEFT;
     let letterSpacing: number = this._opts.letterSpacing || 0;
@@ -84,7 +131,7 @@ export default class TagsMapper {
 
     // Y position is based on CSS line height calculation
     let x = 0;
-    let y = -font.ascender - L / 2;
+    let y = font.ascender + L / 2;
     let totalHeight = (AD + L) * lines.length;
     let preferredWidth = isFinite(width) ? width : maxLineWidth;
     let glyphs: Array<GlyphData> = [];
@@ -101,11 +148,11 @@ export default class TagsMapper {
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
         let glyph = this.getGlyph(font, char);
-
+        let metrics: Metrics = glyph.getMetrics();
         // TODO:
         // Align center & right are off by a couple pixels, need to revisit.
         if (j === start && align === Align.RIGHT) {
-          x -= glyph.getMetrics().leftSideBearing;
+          x -= metrics.leftSideBearing;
         }
 
         // Apply kerning
@@ -136,7 +183,7 @@ export default class TagsMapper {
       }
 
       // Advance down
-      y -= lineHeight;
+      y += lineHeight;
       x = 0;
     }
 
@@ -165,8 +212,12 @@ export default class TagsMapper {
 
   }
 
+  getPosByData(data: GlyphData) {
+    let x: number = this.getPxByUnit(glyph.position.x);
+  }
+
   measure(text: string, start: number, end: number, width: number): Line {
-    return this.computeMetrics(this._font, text, start, end, width, 3);
+    return this.computeMetrics(this._font, text, start, end, width, 0);
   }
 
   computeMetrics(font: Font, text: string, start: number, end: number, width: number = Infinity, letterSpacing: number = 0): Line {
@@ -225,12 +276,12 @@ export default class TagsMapper {
     return font.charToGlyph(isTab ? ' ' : char);
   }
 
-  getAdvance(glyph, char) {
+  getAdvance(glyph: Glyph, char: string) {
     // TODO: handle tab gracefully
     return glyph.advanceWidth;
   }
 
-  ensureMetrics(glyph) {
+  ensureMetrics(glyph: Glyph) {
     // Opentype.js only builds its paths when the getter is accessed
     // so we force it here.
     return glyph.path;

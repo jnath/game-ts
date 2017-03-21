@@ -85,28 +85,30 @@ export default class Game extends Layout {
 
       StateManager.getInstance().start(() => {
         console.log('start complete');
-        let textField: TextField = new TextField('Hello World', {
+        let textField: TextField = new TextField('this is a dummy text that overflows the max width. New lines \nmust be considered.', {
           fontSize: 40,
           fontName: 'KomikaAxis'
         });
+        textField.width = 200;
+        textField.wordWrap = true;
 
         this.addChild(textField);
 
-        // let gf: Graphics = new Graphics();
-        // let i: number = 0;
-        // setInterval(() => {
-        //   textField.text = `Hello ${i}\ncoucou`;
-        //   i++;
-        // }, 1000);
+        let i: number = 0;
+        setInterval(() => {
+          textField.width += 10;
+          i++;
+        }, 1000);
 
-        // setInterval(() => {
-        //   gf.clear();
-        //   gf.beginFill(0xFF0000, .5);
-        //   gf.drawRect(textField.x, textField.y, textField.width, textField.height);
-        //   gf.endFill();
-        // }, 100);
+        let gf: Graphics = new Graphics();
+        setInterval(() => {
+          gf.clear();
+          gf.beginFill(0xFF0000, .5);
+          gf.drawRect(textField.x, textField.y, textField.width, textField.height);
+          gf.endFill();
+        }, 100);
 
-        // this.addChild(gf);
+        this.addChild(gf);
       });
 
 
