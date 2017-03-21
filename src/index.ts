@@ -9,9 +9,9 @@ import AssetLoader from './process/AssetLoader';
 
 
 declare global {
-    interface Window {
-        debug: (ctn: Container) => void;
-    }
+  interface Window {
+    debug: (ctn: Container) => void;
+  }
 }
 (<any>window).debug = (ctn: Container) => {
   if (!ctn['debug_gf']) {

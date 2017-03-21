@@ -6,11 +6,11 @@ import Resource = loaders.Resource;
 import opentype, { Font } from 'opentype.js';
 
 interface AssetList {
-  [ cathName: string ]: { [name: string]: string };
+  [cathName: string]: { [name: string]: string };
 }
 
 interface Loaders {
-  [ cathName: string]: Loader;
+  [cathName: string]: Loader;
 }
 export { Loader }
 
@@ -30,7 +30,7 @@ export default class AssetLoader extends EventEmitter {
     super();
   }
 
-  private static _fonts: {[name: string]: Font} = {};
+  private static _fonts: { [name: string]: Font } = {};
 
   static getFont(name: string): Font {
     return AssetLoader._fonts[name];
@@ -61,7 +61,7 @@ export default class AssetLoader extends EventEmitter {
               if (font) {
                 console.log(`font loaded name : ${font.names.postScriptName['en']}`);
                 AssetLoader._fonts[font.names.postScriptName['en']] = font;
-              }else {
+              } else {
                 throw Error(`Font ${ressource.url} is not loaded`);
               }
               next();

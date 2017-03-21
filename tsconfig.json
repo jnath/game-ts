@@ -6,7 +6,8 @@
     "outDir": "./lib",
     "baseUrl": "./",
     "paths": {
-      "gsap":["./node_modules/@types/gsap/index.d.ts"]
+      "gsap": ["./node_modules/@types/gsap/index.d.ts"],
+      "matter-js": ["./node_modules/@types/matter-js/index.d.ts"]
     },
     "lib": ["es2017", "dom", "scripthost"]
   }

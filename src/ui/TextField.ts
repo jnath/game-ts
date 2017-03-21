@@ -3,6 +3,8 @@ import { Sprite, Texture, Graphics } from 'pixi.js';
 import { Font, FontOptions, RenderOptions, BoundingBox } from 'opentype.js';
 import AssetLoader from '../process/AssetLoader';
 
+import TagsMapper from './tools/TagsMapper';
+
 declare module 'opentype.js' {
   export interface BoundingBox {
     x1: number;
@@ -26,6 +28,7 @@ declare module 'opentype.js' {
 export interface TextStyle {
   fontSize: number;
   fontName: string;
+  wordWrap?: boolean;
   options?: FontOptions;
 }
 
@@ -39,16 +42,21 @@ export default class TextField extends Sprite {
   private _context: CanvasRenderingContext2D;
 
   private _rendererOptions: RenderOptions;
-  private _textStyle: TextStyle;
+  private _style: TextStyle;
 
   private _baselineY: number;
   private _lineHeight: number;
+  private _font: Font;
 
   private resolution: number;
 
   private dirty: boolean;
 
-  constructor(text: string, textStyle: TextStyle, rendererOptions?: RenderOptions, canvas?: HTMLCanvasElement) {
+  private tagsMapper: TagsMapper;
+
+  styles: { [name: string]: TextStyle };
+
+  constructor(text: string, style: TextStyle, rendererOptions?: RenderOptions, canvas?: HTMLCanvasElement) {
 
     canvas = canvas || document.createElement('canvas');
     canvas.width = 300;
@@ -61,28 +69,40 @@ export default class TextField extends Sprite {
 
     this._text = text;
     this._rendererOptions = rendererOptions;
-    this._textStyle = textStyle;
+    this._style = style;
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
 
-    this._textStyle = textStyle;
-    this._textStyle.fontSize = textStyle.fontSize || 12;
+    this._style = style;
+    this._style.fontSize = style.fontSize || 12;
 
-    this.draw(this._text, this._textStyle);
+    this._font = AssetLoader.getFont(this._style.fontName);
+
+    this.tagsMapper = new TagsMapper(this._text, this._font);
+
+    this.updateText();
+
   }
 
   get text(): string { return this._text; }
   set text(value: string) {
     this._text = value;
-    this.draw(this._text, this._textStyle);
+    this.tagsMapper.text = this._text;
+    this.updateText();
   }
 
-  draw(text: string, textStyle: TextStyle) {
-    let font = AssetLoader.getFont(textStyle.fontName);
+  updateText() {
+    let metrics = this.tagsMapper.compute();
+    console.log(metrics);
+  }
 
-    this._baselineY = font.ascender / font.unitsPerEm * textStyle.fontSize;
-    let snapPath = font.getPath(this._text, 0, this._baselineY, textStyle.fontSize, this._rendererOptions);
-    let boundingBox: BoundingBox =  snapPath.getBoundingBox();
+  draw(text: string, style: TextStyle) {
+
+    let font: Font = this._font;
+
+    this._baselineY = font.ascender / font.unitsPerEm * style.fontSize;
+    let snapPath = font.getPath(this._text, 0, this._baselineY, style.fontSize, this._rendererOptions);
+    let boundingBox: BoundingBox = snapPath.getBoundingBox();
 
     let x: number = -boundingBox.x1;
     let y: number = this._baselineY - boundingBox.y1;
@@ -90,7 +110,7 @@ export default class TextField extends Sprite {
     this._canvas.width = Math.ceil(boundingBox.x2 - boundingBox.x1);
     this._canvas.height = Math.ceil(boundingBox.y2 - boundingBox.y1);
 
-    font.draw(this._context, this._text, x, y, textStyle.fontSize, this._rendererOptions);
+    font.draw(this._context, this._text, x, y, style.fontSize, this._rendererOptions);
   }
 
   /**
@@ -100,43 +120,44 @@ export default class TextField extends Sprite {
    */
   updateCanvasSize() {
 
-        this._texture.baseTexture.hasLoaded = true;
-        this._texture.baseTexture.resolution = this.resolution;
-        this._texture.baseTexture.realWidth = this._canvas.width;
-        this._texture.baseTexture.realHeight = this._canvas.height;
-        this._texture.baseTexture.width = this._canvas.width / this.resolution;
-        this._texture.baseTexture.height = this._canvas.height / this.resolution;
+    this._texture.baseTexture.hasLoaded = true;
+    this._texture.baseTexture.resolution = this.resolution;
+    this._texture.baseTexture.realWidth = this._canvas.width;
+    this._texture.baseTexture.realHeight = this._canvas.height;
+    this._texture.baseTexture.width = this._canvas.width / this.resolution;
+    this._texture.baseTexture.height = this._canvas.height / this.resolution;
 
-        // call sprite onTextureUpdate to update scale if _width or _height were set
-        this._onTextureUpdate();
-        this._texture.baseTexture.emit('update', this._texture.baseTexture);
+    // call sprite onTextureUpdate to update scale if _width or _height were set
+    this._onTextureUpdate();
+    this._texture.baseTexture.emit('update', this._texture.baseTexture);
+  }
+
+  /**
+   * Renders the object using the WebGL renderer
+   *
+   * @param {PIXI.WebGLRenderer} renderer - The renderer
+   */
+  renderWebGL(renderer: PIXI.WebGLRenderer) {
+    if (this.resolution !== renderer.resolution) {
+      this.resolution = renderer.resolution;
+    }
+    this.updateCanvasSize();
+    super.renderWebGL(renderer);
+  }
+
+  /**
+   * Renders the object using the Canvas renderer
+   *
+   * @private
+   * @param {PIXI.CanvasRenderer} renderer - The renderer
+   */
+  _renderCanvas(renderer: PIXI.CanvasRenderer) {
+    if (this.resolution !== renderer.resolution) {
+      this.resolution = renderer.resolution;
     }
 
-    /**
-     * Renders the object using the WebGL renderer
-     *
-     * @param {PIXI.WebGLRenderer} renderer - The renderer
-     */
-    renderWebGL(renderer: PIXI.WebGLRenderer) {
-        if (this.resolution !== renderer.resolution) {
-            this.resolution = renderer.resolution;
-        }
-        this.updateCanvasSize();
-        super.renderWebGL(renderer);
-    }
-
-    /**
-     * Renders the object using the Canvas renderer
-     *
-     * @private
-     * @param {PIXI.CanvasRenderer} renderer - The renderer
-     */
-    _renderCanvas(renderer: PIXI.CanvasRenderer) {
-        if (this.resolution !== renderer.resolution){
-            this.resolution = renderer.resolution;
-        }
-        this.updateCanvasSize();
-        super._renderCanvas(renderer);
-    }
+    this.updateCanvasSize();
+    super._renderCanvas(renderer);
+  }
 
 }

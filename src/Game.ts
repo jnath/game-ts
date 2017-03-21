@@ -52,27 +52,27 @@ export default class Game extends Layout {
       }]
     })
 
-    .use((data: MiddlewareData, next: () => void) => {
-      gsap.to(this.intro, 1, {
-        x: ( this.width - this.intro.width ) / 2,
-        y: ( this.height - this.intro.height ) / 2,
-        ease: Elastic.easeOut.config(1, 0.3),
-      });
-      next();
-    }, { nextState: 'intro' })
-
-    .use((data: MiddlewareData, next: () => void) => {
-      if (data.nextState === 'game') {
+      .use((data: MiddlewareData, next: () => void) => {
         gsap.to(this.intro, 1, {
-          y: - this.intro.height,
+          x: (this.width - this.intro.width) / 2,
+          y: (this.height - this.intro.height) / 2,
           ease: Elastic.easeOut.config(1, 0.3),
-          onComplete: () => this.removeChild(this.intro)
         });
-        this.gamePlay.start();
-      }
+        next();
+      }, { nextState: 'intro' })
 
-      next();
-    });
+      .use((data: MiddlewareData, next: () => void) => {
+        if (data.nextState === 'game') {
+          gsap.to(this.intro, 1, {
+            y: - this.intro.height,
+            ease: Elastic.easeOut.config(1, 0.3),
+            onComplete: () => this.removeChild(this.intro)
+          });
+          this.gamePlay.start();
+        }
+
+        next();
+      });
 
     this.load('all', () => {
 
@@ -92,21 +92,21 @@ export default class Game extends Layout {
 
         this.addChild(textField);
 
-        let gf: Graphics = new Graphics();
-        let i: number = 0;
-        setInterval(() => {
-          textField.text = `Hello ${i}`;
-          i++;
-        }, 1000);
+        // let gf: Graphics = new Graphics();
+        // let i: number = 0;
+        // setInterval(() => {
+        //   textField.text = `Hello ${i}\ncoucou`;
+        //   i++;
+        // }, 1000);
 
-        setInterval(() => {
-          gf.clear();
-          gf.beginFill(0xFF0000, .5);
-          gf.drawRect(textField.x, textField.y, textField.width, textField.height);
-          gf.endFill();
-        }, 100);
+        // setInterval(() => {
+        //   gf.clear();
+        //   gf.beginFill(0xFF0000, .5);
+        //   gf.drawRect(textField.x, textField.y, textField.width, textField.height);
+        //   gf.endFill();
+        // }, 100);
 
-        this.addChild(gf);
+        // this.addChild(gf);
       });
 
 
@@ -125,8 +125,8 @@ export default class Game extends Layout {
   createIntro() {
     this.intro = new Intro();
     this.intro.width = this.width / 3 * 2;
-    this.intro.height =  this.height / 3 * 2;
-    this.intro.x = ( this.width - this.intro.width ) / 2;
+    this.intro.height = this.height / 3 * 2;
+    this.intro.x = (this.width - this.intro.width) / 2;
     this.intro.y = - this.intro.height;
     this.intro.on('play', () => this.startGame());
     this.addChild(this.intro);
@@ -135,7 +135,7 @@ export default class Game extends Layout {
   onResize() {
     if (this.intro.parent) {
       gsap.to(this.intro, 1, {
-        x: ( this.width - this.intro.width ) / 2,
+        x: (this.width - this.intro.width) / 2,
         width: this.width / 3 * 2,
         height: this.height / 3 * 2,
         ease: Elastic.easeOut.config(1, 0.3)
@@ -144,7 +144,6 @@ export default class Game extends Layout {
   }
 
   startGame() {
-    console.log("startGame");
     StateManager.getInstance().goto('game');
   }
 
@@ -156,19 +155,22 @@ export default class Game extends Layout {
     loader.onComplete.once(() => {
       loader.onProgress.detachAll();
       gsap.to(this.progress, .5, { percent: 1 });
-      gsap.to(this.progress, .25, { scaleXY: 0, delay: 1, onComplete: () => {
-        this.progress.visible = false;
-        setTimeout(() => {
-          cb();
-        }, 250);
-      }});
+      gsap.to(this.progress, .25, {
+        scaleXY: 0, delay: 1, onComplete: () => {
+          this.progress.visible = false;
+          setTimeout(() => {
+            cb();
+          }, 250);
+        }
+      });
     });
 
     setTimeout(() => {
       this.progress.visible = true;
       this.progress.scaleXY = 0.1;
       this.progress.percent = 0.1;
-      gsap.to(this.progress, 1, { scaleXY: 1, ease: Elastic.easeOut.config(1, 0.3),
+      gsap.to(this.progress, 1, {
+        scaleXY: 1, ease: Elastic.easeOut.config(1, 0.3),
         onComplete: () => loader.load(),
       });
     });
