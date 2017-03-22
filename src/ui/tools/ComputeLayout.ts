@@ -1,6 +1,7 @@
 
 import opentype, { Font, Glyph, Metrics } from 'opentype.js';
 import WordWrapper, { Mode, WordWrapperOpts, Line, MeasureIterator } from './WordWrapper';
+import TagMapper, { Styles, Style } from './TagMapper';
 
 // A default 'line-height' according to Chrome/FF/Safari (Jun 2016)
 const DEFAULT_LINE_HEIGHT = 1.175;
@@ -46,21 +47,23 @@ export interface Layout {
 export default class ComputeLayout {
 
   wordWrapper: WordWrapper;
+  tagMapper: TagMapper;
 
   _text: string;
-  _font: Font;
-  _fontSize: number;
+  _styles: Styles;
   _opts: ComputeLayoutOpts;
 
-  constructor(text: string, font: Font, fontSize: number) {
+  constructor(text: string, styles: Styles) {
     this._text = text;
-    this._font = font;
-    this._fontSize = fontSize;
+    this._styles = styles;
+
+    this.tagMapper = new TagMapper(this._text, this._styles);
   }
 
   get text(): string { return this._text; }
   set text(value: string) {
     this._text = value;
+    this.tagMapper.text = this._text;
   }
 
   getFontSizePx(font: Font, value: number | string, dpi: number = 96) {
@@ -102,18 +105,18 @@ export default class ComputeLayout {
   }
 
   getPxByUnit(value: number) {
-    return value / this._font.unitsPerEm * this._fontSize;
+    return value / this._styles.default.font.unitsPerEm * this._styles.default.fontSize;
   }
 
   compute(opts: ComputeLayoutOpts = <any>{}): Layout {
     this._opts = opts;
-    let font: Font = this._font;
-    let text: string = this._text;
+    let font: Font = this._styles.default.font;
+    let text: string = this.tagMapper.cleanText();
     let align: Align = this._opts.align || Align.LEFT;
     let letterSpacing: number = this._opts.letterSpacing || 0;
     let width: number = this._opts.width || Infinity;
 
-    this.wordWrapper = new WordWrapper(this._text, Object.assign(this._opts, {
+    this.wordWrapper = new WordWrapper(text, Object.assign(this._opts, {
       measure: this.measure.bind(this)
     }));
 
@@ -147,7 +150,8 @@ export default class ComputeLayout {
       // Layout by glyph
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
-        let glyph = this.getGlyph(font, char);
+        let style: Style = this.tagMapper.getStyle(j);
+        let glyph = this.getGlyph(style.font, char);
         let metrics: Metrics = glyph.getMetrics();
         // TODO:
         // Align center & right are off by a couple pixels, need to revisit.
@@ -212,15 +216,11 @@ export default class ComputeLayout {
 
   }
 
-  getPosByData(data: GlyphData) {
-    let x: number = this.getPxByUnit(glyph.position.x);
-  }
-
   measure(text: string, start: number, end: number, width: number): Line {
-    return this.computeMetrics(this._font, text, start, end, width, 0);
+    return this.computeMetrics(text, start, end, width, 0);
   }
 
-  computeMetrics(font: Font, text: string, start: number, end: number, width: number = Infinity, letterSpacing: number = 0): Line {
+  computeMetrics(text: string, start: number, end: number, width: number = Infinity, letterSpacing: number = 0): Line {
     start = Math.max(0, start || 0);
     end = Math.min(end || text.length, text.length);
 
@@ -230,16 +230,16 @@ export default class ComputeLayout {
 
     for (let i = start; i < end; i++) {
       let char = text.charAt(i);
-
+      let style: Style = this.tagMapper.getStyle(i);
       // Tab is treated as multiple space characters
-      let glyph = this.getGlyph(font, char);
+      let glyph = this.getGlyph(style.font, char);
       this.ensureMetrics(glyph);
 
       // determine kern value to next glyph
       let kerning = 0;
       if (i < end - 1) {
-        let nextGlyph = this.getGlyph(font, text.charAt(i + 1));
-        kerning += font.getKerningValue(glyph, nextGlyph);
+        let nextGlyph = this.getGlyph(style.font, text.charAt(i + 1));
+        kerning += style.font.getKerningValue(glyph, nextGlyph);
       }
 
       // determine if the new pen or width is above our limit

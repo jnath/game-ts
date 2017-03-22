@@ -4,6 +4,9 @@ import { Font, FontOptions, RenderOptions, BoundingBox, Glyph, Metrics, Path } f
 import AssetLoader from '../process/AssetLoader';
 
 import ComputeLayout, { GlyphData, Mode } from './tools/ComputeLayout';
+import {TextStyle} from './TextStyle';
+
+import TagMapper, { Styles, Style } from './tools/TagMapper';
 // import WordWrapper, { WordWrapperOpts, Line, MeasureIterator } from './tools/WordWrapper';
 
 // Most browsers have a default font size of 16px
@@ -27,39 +30,24 @@ declare module 'opentype.js' {
   }
 }
 
-
-export interface TextStyle {
-  fontSize: number;
-  fontName: string;
-  wordWrap?: boolean;
-  options?: FontOptions;
-}
-
 export default class TextField extends Sprite {
 
   private _text: string;
-  private _font: Font;
 
   private _canvas: HTMLCanvasElement;
   private _context: CanvasRenderingContext2D;
-
   private _rendererOptions: RenderOptions;
-  private _style: TextStyle;
-
   private _baselineY: number;
   private _lineHeight: number;
-
-  private resolution: number;
-
-  private dirty: boolean;
-
-  private computeLayer: ComputeLayout;
-
   private _wordWrap: boolean;
 
-  styles: { [name: string]: TextStyle };
+  private resolution: number;
+  private computeLayer: ComputeLayout;
 
-  constructor(text: string, style: TextStyle, rendererOptions?: RenderOptions, canvas?: HTMLCanvasElement) {
+  private _styles: Styles;
+
+
+  constructor(text: string, styles: Styles, rendererOptions?: RenderOptions, canvas?: HTMLCanvasElement) {
 
     canvas = canvas || document.createElement('canvas');
     canvas.width = 3;
@@ -72,16 +60,21 @@ export default class TextField extends Sprite {
     this._wordWrap = false;
     this._text = text;
     this._rendererOptions = rendererOptions;
-    this._style = style;
+    this._styles = styles;
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
 
-    this._style = style;
-    this._style.fontSize = style.fontSize || 12;
+    // this._styles.fontSize = style.fontSize || 12;
 
-    this._font = AssetLoader.getFont(this._style.fontName);
+    // this._font = AssetLoader.getFont(this._style.fontName);
 
-    this.computeLayer = new ComputeLayout(this._text, this._font, this._style.fontSize);
+    Object.keys(this._styles).forEach((tagName: string) => {
+      let style: Style = this._styles[tagName];
+      style.font = AssetLoader.getFont(style.fontName);
+      return style;
+    });
+
+    this.computeLayer = new ComputeLayout(this._text, this._styles);
 
     this.updateText();
 
@@ -112,9 +105,11 @@ export default class TextField extends Sprite {
 
   updateText() {
 
-    let fontSizePx = this.computeLayer.getFontSizePx(this._font, this._style.fontSize);
+    // let tagMapper: TagMapper = new TagMapper(this._text, this.styles);
+
+    let fontSizePx = this.computeLayer.getFontSizePx(this._styles.default.font, this._styles.default.fontSize);
     let metrics = this.computeLayer.compute({
-      width: this.computeLayer.getEmUnits(this._font, fontSizePx, this.width),
+      width: this.computeLayer.getEmUnits(this._styles.default.font, fontSizePx, this.width),
       mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY
     });
 
@@ -126,7 +121,7 @@ export default class TextField extends Sprite {
       glyph.data.draw(this._context,
         this.computeLayer.getPxByUnit(glyph.position.x),
         this.computeLayer.getPxByUnit(glyph.position.y),
-      this._style.fontSize);
+      this._styles.default.fontSize);
     });
 
   }

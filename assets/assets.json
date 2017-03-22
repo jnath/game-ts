@@ -6,6 +6,7 @@
   },
   "all":{
     "KOMIKAX":"./assets/font/KOMIKAX_.ttf",
+    "AcmeFontRegular":"./assets/font/AcmeFontRegular.ttf",
     "button_blue":"./assets/button/blue.png",
     "button_green":"./assets/button/green.png",
     "button_grey":"./assets/button/grey.png",

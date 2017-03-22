@@ -85,9 +85,16 @@ export default class Game extends Layout {
 
       StateManager.getInstance().start(() => {
         console.log('start complete');
-        let textField: TextField = new TextField('this is a dummy text that overflows the max width. New lines \nmust be considered.', {
-          fontSize: 40,
-          fontName: 'KomikaAxis'
+        let text: string = 'this is a dummy <youpla>text</youpla> that overflows the <youpla>max</youpla> width. New lines \nmust be <youpla>considered</youpla>.';
+        let textField: TextField = new TextField(text, {
+          default: {
+            fontName: 'KomikaAxis',
+            fontSize: 40
+          },
+          youpla: {
+            fontName: 'AcmeFont',
+            fontSize: 12
+          }
         });
         textField.width = 200;
         textField.wordWrap = true;
