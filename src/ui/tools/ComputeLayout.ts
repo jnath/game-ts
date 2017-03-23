@@ -56,9 +56,9 @@ export default class ComputeLayout {
 
   constructor(text: string, styles: Styles) {
     this._text = text;
-    this._styles = styles;
 
-    this.tagMapper = new TagMapper(this._text, this._styles);
+    this.tagMapper = new TagMapper(this._text, styles);
+    this._styles = this.tagMapper.styles;
   }
 
   get text(): string { return this._text; }
@@ -67,6 +67,11 @@ export default class ComputeLayout {
     this.tagMapper.text = this._text;
   }
 
+  get styles(): Styles { return this._styles; }
+  set styles(value: Styles) {
+    this.tagMapper.styles = value;
+    this._styles = this.tagMapper.styles;
+  }
 
   getEmUnits(value: number, style: Style) {
     let pxScale = 1 / style.font.unitsPerEm * style.fontSize;
@@ -205,6 +210,7 @@ export default class ComputeLayout {
       // Tab is treated as multiple space characters
       let glyph = this.getGlyph(style.font, char);
       // this.ensureMetrics(glyph);
+      console.log(char, style);
 
       // determine kern value to next glyph
       let kerning = 0;

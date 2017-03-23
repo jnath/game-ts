@@ -60,21 +60,18 @@ export default class TextField extends Sprite {
     this._wordWrap = false;
     this._text = text;
     this._rendererOptions = rendererOptions;
-    this._styles = styles;
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
 
-    // this._styles.fontSize = style.fontSize || 12;
-
-    // this._font = AssetLoader.getFont(this._style.fontName);
-
-    Object.keys(this._styles).forEach((tagName: string) => {
-      let style: Style = this._styles[tagName];
+    this._styles = <any>{};
+    Object.keys(styles).forEach((tagName: string) => {
+      let style: Style = Object.assign({}, styles.default, styles[tagName]);
       style.font = AssetLoader.getFont(style.fontName);
-      return style;
+      this._styles[tagName] = style;
     });
 
     this.computeLayer = new ComputeLayout(this._text, this._styles);
+    this._styles = this.computeLayer.styles;
 
     this.updateText();
 
@@ -116,31 +113,14 @@ export default class TextField extends Sprite {
     this._canvas.width = this._width;
     this._canvas.height = this._height;
     metrics.glyphs.forEach((glyph: GlyphData) => {
-      glyph.data.draw(this._context,
-        glyph.position.x,
-        glyph.position.y,
-      glyph.style.fontSize);
+      let path: Path = glyph.data.getPath(glyph.position.x, glyph.position.y, glyph.style.fontSize);
+      path['fill']  = glyph.style.fill || path['fill'];
+      path['stroke']  = glyph.style.stroke || path['stroke'];
+      path['strokeWidth']  = glyph.style.strokeWidth || path['strokeWidth'];
+      path.draw(this._context);
     });
 
   }
-
-
-  // draw(text: string, style: TextStyle) {
-
-  //   let font: Font = this._font;
-
-  //   this._baselineY = font.ascender / font.unitsPerEm * style.fontSize;
-  //   let snapPath = font.getPath(this._text, 0, this._baselineY, style.fontSize, this._rendererOptions);
-  //   let boundingBox: BoundingBox = snapPath.getBoundingBox();
-
-  //   let x: number = -boundingBox.x1;
-  //   let y: number = this._baselineY - boundingBox.y1;
-
-  //   this._canvas.width = Math.ceil(boundingBox.x2 - boundingBox.x1);
-  //   this._canvas.height = Math.ceil(boundingBox.y2 - boundingBox.y1);
-
-  //   font.draw(this._context, this._text, x, y, style.fontSize, this._rendererOptions);
-  // }
 
   /**
    * Updates texture size based on canvas size

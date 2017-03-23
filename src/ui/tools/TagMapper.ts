@@ -25,6 +25,17 @@ interface TagDef {
 
 interface TagsDef { [tagName: string]: Array<TagDef>; };
 
+const defaultTag: Styles = {
+  default: { fontSize: 13 },
+  h1: { fontSize: 24 },
+  h2: { fontSize: 22 },
+  h3: { fontSize: 18 },
+  h4: { fontSize: 16 },
+  h5: { fontSize: 12 },
+  h6: { fontSize: 10 },
+  p: { fontSize: 13 }
+};
+
 export default class TagMapper {
 
   private _styles: Styles;
@@ -33,11 +44,8 @@ export default class TagMapper {
   private tags: TagsDef = <any>{};
 
   constructor(text: string, styles: Styles) {
-
-    this._styles = styles;
     this._text = text;
-
-
+    this.styles = styles;
   }
 
   get text(): string { return this._text; }
@@ -47,7 +55,15 @@ export default class TagMapper {
 
   get styles(): Styles { return this._styles; }
   set styles(value: Styles) {
-    this._styles = value;
+    this._styles = <any>{};
+    let keys: Array<string> = Object.keys(value)
+      .concat(Object.keys(defaultTag))
+      .reduce((prev, cur) => (prev.indexOf(cur) < 0) ? prev.concat([cur]) : prev, []);
+
+    keys.forEach((tagName: string) => {
+      let style: Style = Object.assign({}, defaultTag.default, defaultTag[tagName] || {}, value.default, value[tagName] || {});
+      this._styles[tagName] = style;
+    });
   }
 
   cleanText(): string {
