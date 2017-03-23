@@ -5,6 +5,7 @@ import opentype, { Font, Glyph, Metrics } from 'opentype.js';
 
 export interface Style extends TextStyle {
   font?: Font;
+  letterSpacing?: number;
 }
 
 export interface Styles {
@@ -63,7 +64,7 @@ export default class TagMapper {
       }
       if (tag[1] === '/') {
         last.end = index + start;
-      }else {
+      } else {
         last.start = index + start;
       }
       start -= tag.length;
@@ -78,7 +79,7 @@ export default class TagMapper {
     let rv: Style;
     Object.keys(this.tags).forEach((tagName: string) => {
       this.tags[tagName].forEach((tagDef: TagDef) => {
-        if (index >= tagDef.start && index <= tagDef.end){
+        if (index >= tagDef.start && index <= tagDef.end) {
           if (this._styles[tagName]) {
             rv = this._styles[tagName];
           }

@@ -101,11 +101,11 @@ export default class Game extends Layout {
 
         this.addChild(textField);
 
-        let i: number = 0;
-        setInterval(() => {
-          textField.width += 10;
-          i++;
-        }, 1000);
+        // let i: number = 0;
+        // setInterval(() => {
+        //   textField.width += 10;
+        //   i++;
+        // }, 1000);
 
         let gf: Graphics = new Graphics();
         setInterval(() => {

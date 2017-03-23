@@ -4,7 +4,7 @@ import { Font, FontOptions, RenderOptions, BoundingBox, Glyph, Metrics, Path } f
 import AssetLoader from '../process/AssetLoader';
 
 import ComputeLayout, { GlyphData, Mode } from './tools/ComputeLayout';
-import {TextStyle} from './TextStyle';
+import { TextStyle } from './TextStyle';
 
 import TagMapper, { Styles, Style } from './tools/TagMapper';
 // import WordWrapper, { WordWrapperOpts, Line, MeasureIterator } from './tools/WordWrapper';
@@ -113,15 +113,15 @@ export default class TextField extends Sprite {
       mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY
     });
 
-    this._width = this.computeLayer.getPxByUnit(metrics.width);
-    this._height = this.computeLayer.getPxByUnit(metrics.height);
+    this._width = this.computeLayer.getPxByUnit(metrics.width, this._styles.default);
+    this._height = this.computeLayer.getPxByUnit(metrics.height, this._styles.default);
     this._canvas.width = this._width;
     this._canvas.height = this._height;
     metrics.glyphs.forEach((glyph: GlyphData) => {
       glyph.data.draw(this._context,
-        this.computeLayer.getPxByUnit(glyph.position.x),
-        this.computeLayer.getPxByUnit(glyph.position.y),
-      this._styles.default.fontSize);
+        this.computeLayer.getPxByUnit(glyph.position.x, glyph.style),
+        this.computeLayer.getPxByUnit(glyph.position.y, this._styles.default),
+        glyph.style.fontSize);
     });
 
   }

@@ -29,6 +29,7 @@ export interface GlyphData {
   index: number;
   column: number;
   row: number;
+  style: Style;
 }
 
 export interface Layout {
@@ -104,16 +105,15 @@ export default class ComputeLayout {
     }
   }
 
-  getPxByUnit(value: number) {
-    return value / this._styles.default.font.unitsPerEm * this._styles.default.fontSize;
+  getPxByUnit(value: number, style: Style) {
+    return value / style.font.unitsPerEm * style.fontSize;
   }
 
   compute(opts: ComputeLayoutOpts = <any>{}): Layout {
     this._opts = opts;
-    let font: Font = this._styles.default.font;
+    // let font: Font = this._styles.default.font;
     let text: string = this.tagMapper.cleanText();
     let align: Align = this._opts.align || Align.LEFT;
-    let letterSpacing: number = this._opts.letterSpacing || 0;
     let width: number = this._opts.width || Infinity;
 
     this.wordWrapper = new WordWrapper(text, Object.assign(this._opts, {
@@ -123,18 +123,21 @@ export default class ComputeLayout {
     let lines = this.wordWrapper.lines();
 
     // get max line width from all lines
-    let maxLineWidth = lines.reduce((prev, line) => {
-      return Math.max(prev, line.width);
-    }, 0);
+    let maxLineWidth = lines.reduce((prev, line) => Math.max(prev, line.width), 0);
+
+    let ascender: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.ascender));
+    let descender: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.descender));
+    let unitsPerEm: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.unitsPerEm));
+
 
     // As per CSS spec https://www.w3.org/TR/CSS2/visudet.html#line-height
-    let AD = Math.abs(font.ascender - font.descender);
-    let lineHeight = opts.lineHeight || font.unitsPerEm * DEFAULT_LINE_HEIGHT; // in em units
+    let AD = Math.abs(ascender - descender);
+    let lineHeight = opts.lineHeight || unitsPerEm * DEFAULT_LINE_HEIGHT; // in em units
     let L = lineHeight - AD;
 
     // Y position is based on CSS line height calculation
     let x = 0;
-    let y = font.ascender + L / 2;
+    let y = ascender + L / 2;
     let totalHeight = (AD + L) * lines.length;
     let preferredWidth = isFinite(width) ? width : maxLineWidth;
     let glyphs: Array<GlyphData> = [];
@@ -161,7 +164,7 @@ export default class ComputeLayout {
 
         // Apply kerning
         if (lastGlyph) {
-          x += font.getKerningValue(glyph, lastGlyph) || 0;
+          x += style.font.getKerningValue(glyph, lastGlyph) || 0;
         }
 
         // Align text
@@ -178,9 +181,10 @@ export default class ComputeLayout {
           data: glyph,
           index: j,
           column: c,
-          row: lineIndex
+          row: lineIndex,
+          style: style
         });
-
+        let letterSpacing: number = style.letterSpacing || 0;
         // Advance forward
         x += letterSpacing + this.getAdvance(glyph, char);
         lastGlyph = glyph;
@@ -202,7 +206,7 @@ export default class ComputeLayout {
 
     return {
       glyphs: glyphs,
-      baseline: L / 2 + Math.abs(font.descender),
+      baseline: L / 2 + Math.abs(descender),
       leading: L,
       lines: lines,
       lineHeight: lineHeight,
