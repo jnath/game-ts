@@ -67,42 +67,10 @@ export default class ComputeLayout {
     this.tagMapper.text = this._text;
   }
 
-  getFontSizePx(font: Font, value: number | string, dpi: number = 96) {
-    if (typeof value === 'number') return value;
-    if (typeof value !== 'string') throw new TypeError('Expected number or string for getFontPixelSize');
-    const parsed = this.parseUnit(value);
-    if (!parsed.unit || parsed.unit === 'px') {
-      return parsed.num;
-    }
 
-    if (parsed.unit === 'em') {
-      return parsed.num * DEFAULT_PX_SIZE;
-    } else if (parsed.unit === 'pt') {
-      return parsed.num * dpi / 72;
-    } else {
-      throw new TypeError('Unsupported unit for fontSize: ' + parsed.unit);
-    }
-  }
-
-  parseUnit(str): { num: number; unit: string; } {
-    let out = { num: 0, unit: '' };
-    str = String(str);
-    out.num = parseFloat(str);
-    out.unit = str.match(/[\d.\-\+]*\s*(.*)/)[1] || '';
-    return out;
-  }
-
-  getEmUnits(font: Font, fontSizePx: number, value: number | { num: number; unit: string; }) {
-
-    let parsed: { num: number; unit: string; } = typeof value === 'number' ? { num: value, unit: 'px', } : this.parseUnit(value);
-    if (parsed.unit === 'em') {
-      return parsed.num * font.unitsPerEm;
-    } else if (parsed.unit === 'px') {
-      let pxScale = 1 / font.unitsPerEm * fontSizePx;
-      return parsed.num / pxScale;
-    } else {
-      throw new Error('Invalid unit for getPixelSize: ' + parsed.unit);
-    }
+  getEmUnits(value: number, style: Style) {
+    let pxScale = 1 / style.font.unitsPerEm * style.fontSize;
+    return value / pxScale;
   }
 
   getPxByUnit(value: number, style: Style) {
@@ -111,7 +79,6 @@ export default class ComputeLayout {
 
   compute(opts: ComputeLayoutOpts = <any>{}): Layout {
     this._opts = opts;
-    // let font: Font = this._styles.default.font;
     let text: string = this.tagMapper.cleanText();
     let align: Align = this._opts.align || Align.LEFT;
     let width: number = this._opts.width || Infinity;
@@ -128,11 +95,12 @@ export default class ComputeLayout {
     let ascender: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.ascender));
     let descender: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.descender));
     let unitsPerEm: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.unitsPerEm));
-
+    ascender = this.getPxByUnit(ascender, this._styles.default);
+    descender = this.getPxByUnit(descender, this._styles.default);
 
     // As per CSS spec https://www.w3.org/TR/CSS2/visudet.html#line-height
     let AD = Math.abs(ascender - descender);
-    let lineHeight = opts.lineHeight || unitsPerEm * DEFAULT_LINE_HEIGHT; // in em units
+    let lineHeight = opts.lineHeight || this.getPxByUnit(unitsPerEm * DEFAULT_LINE_HEIGHT, this._styles.default) ; // in em units
     let L = lineHeight - AD;
 
     // Y position is based on CSS line height calculation
@@ -159,12 +127,12 @@ export default class ComputeLayout {
         // TODO:
         // Align center & right are off by a couple pixels, need to revisit.
         if (j === start && align === Align.RIGHT) {
-          x -= metrics.leftSideBearing;
+          x -= this.getPxByUnit(metrics.leftSideBearing, style);
         }
 
         // Apply kerning
         if (lastGlyph) {
-          x += style.font.getKerningValue(glyph, lastGlyph) || 0;
+          x += this.getPxByUnit(style.font.getKerningValue(glyph, lastGlyph), style) || 0;
         }
 
         // Align text
@@ -186,7 +154,7 @@ export default class ComputeLayout {
         });
         let letterSpacing: number = style.letterSpacing || 0;
         // Advance forward
-        x += letterSpacing + this.getAdvance(glyph, char);
+        x += letterSpacing + this.getPxByUnit(glyph.advanceWidth, style);
         lastGlyph = glyph;
       }
 
@@ -217,7 +185,6 @@ export default class ComputeLayout {
       height: totalHeight
     };
 
-
   }
 
   measure(text: string, start: number, end: number, width: number): Line {
@@ -237,13 +204,13 @@ export default class ComputeLayout {
       let style: Style = this.tagMapper.getStyle(i);
       // Tab is treated as multiple space characters
       let glyph = this.getGlyph(style.font, char);
-      this.ensureMetrics(glyph);
+      // this.ensureMetrics(glyph);
 
       // determine kern value to next glyph
       let kerning = 0;
       if (i < end - 1) {
         let nextGlyph = this.getGlyph(style.font, text.charAt(i + 1));
-        kerning += style.font.getKerningValue(glyph, nextGlyph);
+        kerning += this.getPxByUnit(style.font.getKerningValue(glyph, nextGlyph), style);
       }
 
       // determine if the new pen or width is above our limit
@@ -251,12 +218,12 @@ export default class ComputeLayout {
       let xMin = glyph.getMetrics().xMin || 0;
       let glyphWidth = xMax - xMin;
       let rsb = this.getRightSideBearing(glyph);
-      let newWidth = pen + glyph.getMetrics().leftSideBearing + glyphWidth + rsb;
+      let newWidth = pen + this.getPxByUnit(glyph.getMetrics().leftSideBearing + glyphWidth + rsb, style);
       if (newWidth > width) {
         break;
       }
 
-      pen += letterSpacing + this.getAdvance(glyph, char) + kerning;
+      pen += letterSpacing + this.getPxByUnit(glyph.advanceWidth, style) + kerning;
       curWidth = newWidth;
       count++;
     }
@@ -278,17 +245,6 @@ export default class ComputeLayout {
   getGlyph(font: Font, char: string) {
     let isTab = char === '\t';
     return font.charToGlyph(isTab ? ' ' : char);
-  }
-
-  getAdvance(glyph: Glyph, char: string) {
-    // TODO: handle tab gracefully
-    return glyph.advanceWidth;
-  }
-
-  ensureMetrics(glyph: Glyph) {
-    // Opentype.js only builds its paths when the getter is accessed
-    // so we force it here.
-    return glyph.path;
   }
 
 }

@@ -105,23 +105,21 @@ export default class TextField extends Sprite {
 
   updateText() {
 
-    // let tagMapper: TagMapper = new TagMapper(this._text, this.styles);
-
-    let fontSizePx = this.computeLayer.getFontSizePx(this._styles.default.font, this._styles.default.fontSize);
     let metrics = this.computeLayer.compute({
-      width: this.computeLayer.getEmUnits(this._styles.default.font, fontSizePx, this.width),
+      width: this.width,
       mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY
     });
 
-    this._width = this.computeLayer.getPxByUnit(metrics.width, this._styles.default);
-    this._height = this.computeLayer.getPxByUnit(metrics.height, this._styles.default);
+    this._width = metrics.width;
+    this._height = metrics.height;
+
     this._canvas.width = this._width;
     this._canvas.height = this._height;
     metrics.glyphs.forEach((glyph: GlyphData) => {
       glyph.data.draw(this._context,
-        this.computeLayer.getPxByUnit(glyph.position.x, glyph.style),
-        this.computeLayer.getPxByUnit(glyph.position.y, this._styles.default),
-        glyph.style.fontSize);
+        glyph.position.x,
+        glyph.position.y,
+      glyph.style.fontSize);
     });
 
   }
