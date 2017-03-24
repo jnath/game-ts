@@ -110,13 +110,15 @@ export default class TextField extends Sprite {
     this._width = metrics.width;
     this._height = metrics.height;
 
+    console.log('metrics', metrics);
+
     this._canvas.width = this._width;
     this._canvas.height = this._height;
     metrics.glyphs.forEach((glyph: GlyphData) => {
       let path: Path = glyph.data.getPath(glyph.position.x, glyph.position.y, glyph.style.fontSize);
-      path['fill']  = glyph.style.fill || path['fill'];
-      path['stroke']  = glyph.style.stroke || path['stroke'];
-      path['strokeWidth']  = glyph.style.strokeWidth || path['strokeWidth'];
+      path['fill'] = glyph.style.fill || path['fill'];
+      path['stroke'] = glyph.style.stroke || path['stroke'];
+      path['strokeWidth'] = glyph.style.strokeWidth || path['strokeWidth'];
       path.draw(this._context);
     });
 

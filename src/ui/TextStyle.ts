@@ -6,4 +6,6 @@ export interface TextStyle {
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
+  lineHeight?: number;
+  interLine?: number;
 }

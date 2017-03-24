@@ -67,6 +67,11 @@ export default class TagMapper {
   }
 
   cleanText(): string {
+    // let parser = new DOMParser();
+    // let doc = parser.parseFromString(`<body>${this._text}</body>`, 'text/xml');
+
+    // console.log(this._text, doc);
+
     this.tags = <any>{};
     let start: number = 0;
     let a = this._text.replace(/<\/?(\w*)>/g, (tag, tagName, index, text) => {
@@ -87,8 +92,93 @@ export default class TagMapper {
       return '';
     });
 
-    console.log(this.tags);
     return a;
+  }
+
+
+  /**
+   * Simple XML parser
+   * @param {String} xml
+   * @return {Object}
+   */
+  parseXML(xml: string): any {
+
+    let beg = -1;
+    let end = 0;
+    let tmp = 0;
+    let current = [];
+    let obj = {};
+    let from = -1;
+
+    while (true) {
+
+      beg = xml.indexOf('<', beg + 1);
+      if (beg === -1)
+        break;
+
+      end = xml.indexOf('>', beg + 1);
+      if (end === -1)
+        break;
+
+      let el = xml.substring(beg, end + 1);
+      let c = el[1];
+
+      if (c === '?' || c === '/') {
+
+        let o = current.pop();
+
+        if (from === -1 || o !== el.substring(2, el.length - 1))
+          continue;
+
+        let path = current.join('.') + '.' + o;
+        let value = xml.substring(from, beg);
+
+        if (typeof (obj[path]) === 'undefined')
+          obj[path] = value;
+        else if (obj[path] instanceof Array)
+          obj[path].push(value);
+        else
+          obj[path] = [obj[path], value];
+
+        from = -1;
+        continue;
+      }
+
+      tmp = el.indexOf(' ');
+      let hasAttributes = true;
+
+      if (tmp === -1) {
+        tmp = el.length - 1;
+        hasAttributes = false;
+      }
+
+      from = beg + el.length;
+
+      let isSingle = el[el.length - 2] === '/';
+      let name = el.substring(1, tmp);
+
+      if (!isSingle)
+        current.push(name);
+
+      if (!hasAttributes)
+        continue;
+
+      let match = el.match(/\w+\=\".*?\"/g);
+      if (match === null)
+        continue;
+
+      let attr = {};
+      let length = match.length;
+
+      for (let i = 0; i < length; i++) {
+        let index = match[i].indexOf('"');
+        attr[match[i].substring(0, index - 1)] = match[i].substring(index + 1, match[i].length - 1);
+      }
+
+      obj[current.join('.') + (isSingle ? '.' + name : '') + '[]'] = attr;
+    }
+
+    return obj;
   }
 
   getStyle(index: number): Style {
