@@ -88,10 +88,13 @@ export default class Game extends Layout {
         let text: string = '<h1>this is a dummy</h1> <p><youpla>text</youpla> that overflows</p> the <youpla>max</youpla> width. New lines \nmust be <youpla>consideredg</youpla>.';
         let textField: TextField = new TextField(text, {
           default: {
-            fontName: 'KomikaAxis',
+            fontFamily: 'Arial'
+            // fontName: 'ArialMT',
           },
           youpla: {
-            fontName: 'AcmeFont',
+            // fontName: 'AcmeFont',
+            fontFamily: 'Arial',
+            fontSubFamily: 'Italic',
             fontSize: 15,
             stroke: '#0000FF',
           },
@@ -110,15 +113,15 @@ export default class Game extends Layout {
         //   i++;
         // }, 1000);
 
-        let gf: Graphics = new Graphics();
-        setInterval(() => {
-          gf.clear();
-          gf.beginFill(0xFF0000, .5);
-          gf.drawRect(textField.x, textField.y, textField.width, textField.height);
-          gf.endFill();
-        }, 100);
+        // let gf: Graphics = new Graphics();
+        // setInterval(() => {
+        //   gf.clear();
+        //   gf.beginFill(0xFF0000, .5);
+        //   gf.drawRect(textField.x, textField.y, textField.width, textField.height);
+        //   gf.endFill();
+        // }, 100);
 
-        this.addChild(gf);
+        // this.addChild(gf);
       });
 
 

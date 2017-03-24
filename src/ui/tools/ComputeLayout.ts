@@ -34,13 +34,9 @@ export interface GlyphData {
 
 export interface Layout {
   glyphs: Array<GlyphData>;
-  // baseline: number;
-  // leading: number;
-  // lines: Array<Line>;
-  // lineHeight: number;
-  // left: number;
-  // right: number;
-  // maxLineWidth: number;
+  lines: Array<Line>;
+  left: number;
+  right: number;
   width: number;
   height: number;
 }
@@ -97,23 +93,9 @@ export default class ComputeLayout {
     // get max line width from all lines
     let maxLineWidth = lines.reduce((prev, line) => Math.max(prev, line.width), 0);
 
-    // let ascender: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.ascender));
-    // let descender: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.descender));
-    // let unitsPerEm: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].font.unitsPerEm));
-    // let fontSize: number = Math.max.apply(Math, Object.keys(this._styles).map((key) => this._styles[key].fontSize));
-    // ascender = this.getPxByUnit(ascender, this._styles.default);
-    // descender = this.getPxByUnit(descender, this._styles.default);
-
-    // As per CSS spec https://www.w3.org/TR/CSS2/visudet.html#line-height
-    // let AD = Math.abs(ascender - descender);
-    // let lineHeight = opts.lineHeight || this.getPxByUnit(unitsPerEm * DEFAULT_LINE_HEIGHT, this._styles.default); // in em units
-    // let L = lineHeight - AD;
-
     // Y position is based on CSS line height calculation
     let x = 0;
     let y = 0;
-    // let y = ascender + L / 2;
-    // let totalHeight = (AD + L) * lines.length;
     let totalHeight = 0;
     let preferredWidth = isFinite(width) ? width : maxLineWidth;
     let glyphs: Array<GlyphData> = [];
@@ -125,23 +107,34 @@ export default class ComputeLayout {
       let start = line.start;
       let end = line.end;
       let lineWidth = line.width;
-      let lineHeight: number = 0;
-      let L: number = 0;
-      let AD: number = 0;
+      let lineAscender: number = 0;
+      let lineDescender: number = 0;
+      let lineFontSize: number = 0;
+      let lineHeight: number = 0; // in em units
 
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
         let style: Style = this.tagMapper.getStyle(j);
         let glyph = this.getGlyph(style.font, char);
         let metrics: Metrics = glyph.getMetrics();
-        AD = Math.max(AD, this.getPxByUnit(style.font.ascender - style.font.descender, style));
-        lineHeight = Math.max(lineHeight, (style.lineHeight || DEFAULT_LINE_HEIGHT) * style.fontSize);
-        L = Math.max(L, style.interLine || lineHeight - AD);
+        lineAscender = Math.max(lineAscender, this.getPxByUnit(style.font.ascender, style));
+        lineDescender = Math.max(lineDescender, this.getPxByUnit(style.font.descender, style));
+        lineFontSize = Math.max(lineFontSize, style.fontSize);
+      }
+      for (let j = start, c = 0; j < end; j++ , c++) {
+        let char = text.charAt(j);
+        let style: Style = this.tagMapper.getStyle(j);
+        lineHeight = Math.max(lineHeight, ( style.lineHeight || DEFAULT_LINE_HEIGHT ) * lineFontSize);
       }
 
-      totalHeight += AD + L;
-      y += lineHeight;
+      // As per CSS spec https://www.w3.org/TR/CSS2/visudet.html#line-height
+      let AD = Math.abs(lineAscender - lineDescender);
+      let leading = lineHeight - AD;
 
+      if (lineIndex === 0) {
+        totalHeight += lineHeight;
+        y += lineHeight;
+      }
 
       // Layout by glyph
       for (let j = start, c = 0; j < end; j++ , c++) {
@@ -149,7 +142,7 @@ export default class ComputeLayout {
         let style: Style = this.tagMapper.getStyle(j);
         let glyph = this.getGlyph(style.font, char);
         let metrics: Metrics = glyph.getMetrics();
-        // lineHeight = Math.max(lineHeight, (style.lineHeight || DEFAULT_LINE_HEIGHT) * style.fontSize);
+
         // TODO:
         // Align center & right are off by a couple pixels, need to revisit.
         if (j === start && align === Align.RIGHT) {
@@ -169,6 +162,10 @@ export default class ComputeLayout {
           tx = preferredWidth - lineWidth;
         }
 
+        if (c === 0) {
+          x += -this.getPxByUnit(metrics.xMin, style);
+        }
+
         // Store glyph data
         glyphs.push({
           position: { x: x + tx, y: y },
@@ -186,27 +183,25 @@ export default class ComputeLayout {
 
       // Advance down
       x = 0;
-      // totalHeight += lineHeight;
+      totalHeight += lineHeight + leading;
+      y += lineHeight;
+
     }
 
     // Compute left & right values
-    // let left = 0;
-    // if (align === Align.CENTER) {
-    //   left = (preferredWidth - maxLineWidth) / 2;
-    // } else if (align === Align.RIGHT) {
-    //   left = preferredWidth - maxLineWidth;
-    // }
-    // let right = Math.max(0, preferredWidth - maxLineWidth - left);
+    let left = 0;
+    if (align === Align.CENTER) {
+      left = (preferredWidth - maxLineWidth) / 2;
+    } else if (align === Align.RIGHT) {
+      left = preferredWidth - maxLineWidth;
+    }
+    let right = Math.max(0, preferredWidth - maxLineWidth - left);
 
     return {
       glyphs: glyphs,
-      // baseline: L / 2 + Math.abs(descender),
-      // leading: L,
-      // lines: lines,
-      // lineHeight: lineHeight,
-      // left: left,
-      // right: right,
-      // maxLineWidth: maxLineWidth,
+      lines: lines,
+      left: left,
+      right: right,
       width: preferredWidth,
       height: totalHeight
     };
@@ -231,8 +226,6 @@ export default class ComputeLayout {
       let style: Style = this.tagMapper.getStyle(i);
       // Tab is treated as multiple space characters
       let glyph = this.getGlyph(style.font, char);
-      // this.ensureMetrics(glyph);
-      // console.log(char, style);
 
       // determine kern value to next glyph
       let kerning = 0;

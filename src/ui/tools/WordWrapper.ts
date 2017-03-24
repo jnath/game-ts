@@ -34,7 +34,6 @@ export default class WordWrapper {
   constructor(text: string, opts: WordWrapperOpts) {
     this._text = text;
     this._opts = opts;
-    console.log(this._opts);
   }
 
   textWordWraped(breakLine: string = '\n') {

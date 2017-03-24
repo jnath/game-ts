@@ -66,7 +66,11 @@ export default class TextField extends Sprite {
     this._styles = <any>{};
     Object.keys(styles).forEach((tagName: string) => {
       let style: Style = Object.assign({}, styles.default, styles[tagName]);
-      style.font = AssetLoader.getFont(style.fontName);
+      if (style.fontName) {
+        style.font = AssetLoader.getFont(style.fontName);
+      }else if (style.fontFamily) {
+        style.font = AssetLoader.getFontFamily(style.fontFamily, style.fontSubFamily);
+      }
       this._styles[tagName] = style;
     });
 

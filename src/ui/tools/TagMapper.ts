@@ -2,10 +2,15 @@
 import { TextStyle } from './../TextStyle';
 import opentype, { Font, Glyph, Metrics } from 'opentype.js';
 
+export enum DisplayMode {
+  INLINE,
+  BLOCK
+}
 
 export interface Style extends TextStyle {
   font?: Font;
   letterSpacing?: number;
+  display?: DisplayMode;
 }
 
 export interface Styles {
@@ -25,15 +30,37 @@ interface TagDef {
 
 interface TagsDef { [tagName: string]: Array<TagDef>; };
 
+
 const defaultTag: Styles = {
   default: { fontSize: 13 },
-  h1: { fontSize: 24 },
-  h2: { fontSize: 22 },
-  h3: { fontSize: 18 },
-  h4: { fontSize: 16 },
-  h5: { fontSize: 12 },
-  h6: { fontSize: 10 },
-  p: { fontSize: 13 }
+  h1: {
+    fontSize: 24,
+    display: DisplayMode.BLOCK
+  },
+  h2: {
+    fontSize: 22,
+    display: DisplayMode.BLOCK
+  },
+  h3: {
+    fontSize: 18,
+    display: DisplayMode.BLOCK
+  },
+  h4: {
+    fontSize: 16,
+    display: DisplayMode.BLOCK
+  },
+  h5: {
+    fontSize: 12,
+    display: DisplayMode.BLOCK
+  },
+  h6: {
+    fontSize: 10,
+    display: DisplayMode.BLOCK
+  },
+  p: {
+    fontSize: 13,
+    display: DisplayMode.BLOCK
+  }
 };
 
 export default class TagMapper {
@@ -67,14 +94,11 @@ export default class TagMapper {
   }
 
   cleanText(): string {
-    // let parser = new DOMParser();
-    // let doc = parser.parseFromString(`<body>${this._text}</body>`, 'text/xml');
-
-    // console.log(this._text, doc);
 
     this.tags = <any>{};
     let start: number = 0;
-    let a = this._text.replace(/<\/?(\w*)>/g, (tag, tagName, index, text) => {
+    let a = this._text.replace(/<\/?(\w*)>/g, (tag: string, tagName: string, index: number, text: string) => {
+      let rv = '';
       if (!this.tags[tagName]) {
         this.tags[tagName] = [];
       }
@@ -85,100 +109,18 @@ export default class TagMapper {
       }
       if (tag[1] === '/') {
         last.end = index + start;
+        if (this._styles[tagName] && this._styles[tagName].display === DisplayMode.BLOCK) {
+          rv = '\n';
+        }
       } else {
         last.start = index + start;
       }
       start -= tag.length;
-      return '';
+      start += rv.length;
+      return rv;
     });
 
     return a;
-  }
-
-
-  /**
-   * Simple XML parser
-   * @param {String} xml
-   * @return {Object}
-   */
-  parseXML(xml: string): any {
-
-    let beg = -1;
-    let end = 0;
-    let tmp = 0;
-    let current = [];
-    let obj = {};
-    let from = -1;
-
-    while (true) {
-
-      beg = xml.indexOf('<', beg + 1);
-      if (beg === -1)
-        break;
-
-      end = xml.indexOf('>', beg + 1);
-      if (end === -1)
-        break;
-
-      let el = xml.substring(beg, end + 1);
-      let c = el[1];
-
-      if (c === '?' || c === '/') {
-
-        let o = current.pop();
-
-        if (from === -1 || o !== el.substring(2, el.length - 1))
-          continue;
-
-        let path = current.join('.') + '.' + o;
-        let value = xml.substring(from, beg);
-
-        if (typeof (obj[path]) === 'undefined')
-          obj[path] = value;
-        else if (obj[path] instanceof Array)
-          obj[path].push(value);
-        else
-          obj[path] = [obj[path], value];
-
-        from = -1;
-        continue;
-      }
-
-      tmp = el.indexOf(' ');
-      let hasAttributes = true;
-
-      if (tmp === -1) {
-        tmp = el.length - 1;
-        hasAttributes = false;
-      }
-
-      from = beg + el.length;
-
-      let isSingle = el[el.length - 2] === '/';
-      let name = el.substring(1, tmp);
-
-      if (!isSingle)
-        current.push(name);
-
-      if (!hasAttributes)
-        continue;
-
-      let match = el.match(/\w+\=\".*?\"/g);
-      if (match === null)
-        continue;
-
-      let attr = {};
-      let length = match.length;
-
-      for (let i = 0; i < length; i++) {
-        let index = match[i].indexOf('"');
-        attr[match[i].substring(0, index - 1)] = match[i].substring(index + 1, match[i].length - 1);
-      }
-
-      obj[current.join('.') + (isSingle ? '.' + name : '') + '[]'] = attr;
-    }
-
-    return obj;
   }
 
   getStyle(index: number): Style {

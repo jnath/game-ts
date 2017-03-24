@@ -7,6 +7,17 @@
   "all":{
     "KOMIKAX":"./assets/font/KOMIKAX_.ttf",
     "AcmeFontRegular":"./assets/font/AcmeFontRegular.ttf",
+
+    "arial":"./assets/font/arial.ttf",
+    "ariblk":"./assets/font/ariblk.ttf",
+    "ARIALN":"./assets/font/ARIALN.TTF",
+    "ariali":"./assets/font/ariali.ttf",
+    "arialbd":"./assets/font/arialbd.ttf",
+    "arialbi":"./assets/font/arialbi.ttf",
+    "ARIALNB":"./assets/font/ARIALNB.TTF",
+    "ARIALNBI":"./assets/font/ARIALNBI.TTF",
+    "ARIALNI":"./assets/font/ARIALNI.TTF",
+
     "button_blue":"./assets/button/blue.png",
     "button_green":"./assets/button/green.png",
     "button_grey":"./assets/button/grey.png",

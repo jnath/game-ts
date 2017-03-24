@@ -1,6 +1,8 @@
 
 
 export interface TextStyle {
+  fontFamily?: string;
+  fontSubFamily?: string;
   fontName?: string;
   fontSize?: number;
   fill?: string;

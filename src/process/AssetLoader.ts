@@ -22,16 +22,23 @@ export default class AssetLoader extends EventEmitter {
 
   static fontExts: Array<string> = [
     'ttf',
+    'TTF',
     'woff',
-    'otf'
+    'WOFF',
+    'otf',
+    'OTF'
   ];
 
   constructor() {
     super();
   }
 
-  private static _fonts: { [name: string]: Font } = {};
+  private static _fonts: { [fontName: string]: Font } = {};
+  private static _fontsMapName: { [fontFamily: string]: {[ fontSubFamily: string]: string } } = {};
 
+  static getFontFamily(fontFamily: string, fontSubfamily: string = 'Regular'): Font {
+    return AssetLoader._fonts[AssetLoader._fontsMapName[fontFamily][fontSubfamily]];
+  }
   static getFont(name: string): Font {
     return AssetLoader._fonts[name];
   }
@@ -59,8 +66,12 @@ export default class AssetLoader extends EventEmitter {
                 throw err;
               }
               if (font) {
-                console.log(`font loaded name : ${font.names.postScriptName['en']}`);
+                console.log(`font loaded name : ${font.names.postScriptName['en']} from ${ressource.url}`, font.names);
                 AssetLoader._fonts[font.names.postScriptName['en']] = font;
+                if (!AssetLoader._fontsMapName[font.names.fontFamily['en']]) {
+                  AssetLoader._fontsMapName[font.names.fontFamily['en']] = {};
+                }
+                AssetLoader._fontsMapName[font.names.fontFamily['en']][font.names.fontSubfamily['en']] = font.names.postScriptName['en'];
               } else {
                 throw Error(`Font ${ressource.url} is not loaded`);
               }
