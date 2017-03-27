@@ -88,7 +88,7 @@ export default class TagMapper {
       .reduce((prev, cur) => (prev.indexOf(cur) < 0) ? prev.concat([cur]) : prev, []);
 
     keys.forEach((tagName: string) => {
-      let style: Style = Object.assign({}, defaultTag.default, defaultTag[tagName] || {}, value.default, value[tagName] || {});
+      let style: Style = Object.assign({}, defaultTag.default, value.default, defaultTag[tagName] || {}, value[tagName] || {});
       this._styles[tagName] = style;
     });
   }

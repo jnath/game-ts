@@ -83,7 +83,6 @@ export default class ComputeLayout {
     let text: string = this.tagMapper.cleanText();
     let align: Align = this._opts.align || Align.LEFT;
     let width: number = this._opts.width || Infinity;
-
     this.wordWrapper = new WordWrapper(text, Object.assign(this._opts, {
       measure: this.measure.bind(this)
     }));
@@ -100,6 +99,10 @@ export default class ComputeLayout {
     let preferredWidth = isFinite(width) ? width : maxLineWidth;
     let glyphs: Array<GlyphData> = [];
     let lastGlyph = null;
+    let lastLeading: number = 0;
+    let maxShadowOffsetY: number = 0;
+    let maxShadowOffsetX: number = 0;
+
 
     // Layout by line
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -110,30 +113,40 @@ export default class ComputeLayout {
       let lineAscender: number = 0;
       let lineDescender: number = 0;
       let lineFontSize: number = 0;
-      let lineHeight: number = 0; // in em units
+      let lineHeight: number = 0;
+      let shadowOffsetY: number = 0;
+      let shadowOffsetX: number = 0;
+
 
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
         let style: Style = this.tagMapper.getStyle(j);
-        let glyph = this.getGlyph(style.font, char);
-        let metrics: Metrics = glyph.getMetrics();
         lineAscender = Math.max(lineAscender, this.getPxByUnit(style.font.ascender, style));
         lineDescender = Math.max(lineDescender, this.getPxByUnit(style.font.descender, style));
         lineFontSize = Math.max(lineFontSize, style.fontSize);
+        shadowOffsetY = Math.max(shadowOffsetY, style.shadowOffsetY || 0);
+        shadowOffsetX = style.shadowOffsetX || 0;
       }
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
         let style: Style = this.tagMapper.getStyle(j);
-        lineHeight = Math.max(lineHeight, ( style.lineHeight || DEFAULT_LINE_HEIGHT ) * lineFontSize);
+        lineHeight = Math.max(lineHeight, (style.lineHeight || DEFAULT_LINE_HEIGHT) * lineFontSize);
       }
 
       // As per CSS spec https://www.w3.org/TR/CSS2/visudet.html#line-height
       let AD = Math.abs(lineAscender - lineDescender);
       let leading = lineHeight - AD;
 
-      if (lineIndex === 0) {
-        totalHeight += lineHeight;
-        y += lineHeight;
+      totalHeight += lineHeight;
+      // lineWidth += shadowOffsetX;
+
+      maxShadowOffsetX = Math.max(maxShadowOffsetX, shadowOffsetX);
+      maxShadowOffsetY = Math.max(maxShadowOffsetY, shadowOffsetY);
+      y += lineHeight;
+
+      if (lineIndex !== 0) {
+        totalHeight += leading;
+        y += leading;
       }
 
       // Layout by glyph
@@ -183,10 +196,14 @@ export default class ComputeLayout {
 
       // Advance down
       x = 0;
-      totalHeight += lineHeight + leading;
-      y += lineHeight;
+      // totalHeight += lineHeight + leading;
+      // y += lineHeight + leading;
+
+      lastLeading = leading;
 
     }
+    totalHeight += lastLeading;
+
 
     // Compute left & right values
     let left = 0;
@@ -202,8 +219,8 @@ export default class ComputeLayout {
       lines: lines,
       left: left,
       right: right,
-      width: preferredWidth,
-      height: totalHeight
+      width: preferredWidth + maxShadowOffsetX,
+      height: totalHeight + maxShadowOffsetY
     };
 
   }

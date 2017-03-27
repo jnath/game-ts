@@ -3,7 +3,7 @@ import { Sprite, Texture, Graphics } from 'pixi.js';
 import { Font, FontOptions, RenderOptions, BoundingBox, Glyph, Metrics, Path } from 'opentype.js';
 import AssetLoader from '../process/AssetLoader';
 
-import ComputeLayout, { GlyphData, Mode } from './tools/ComputeLayout';
+import ComputeLayout, { GlyphData, Mode, Align } from './tools/ComputeLayout';
 import { TextStyle } from './TextStyle';
 
 import TagMapper, { Styles, Style } from './tools/TagMapper';
@@ -65,10 +65,10 @@ export default class TextField extends Sprite {
 
     this._styles = <any>{};
     Object.keys(styles).forEach((tagName: string) => {
-      let style: Style = Object.assign({}, styles.default, styles[tagName]);
+      let style: Style = Object.assign({}, styles[tagName]);
       if (style.fontName) {
         style.font = AssetLoader.getFont(style.fontName);
-      }else if (style.fontFamily) {
+      } else if (style.fontFamily) {
         style.font = AssetLoader.getFontFamily(style.fontFamily, style.fontSubFamily);
       }
       this._styles[tagName] = style;
@@ -108,7 +108,8 @@ export default class TextField extends Sprite {
 
     let metrics = this.computeLayer.compute({
       width: this.width,
-      mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY
+      mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY,
+      align: Align.CENTER
     });
 
     this._width = metrics.width;
@@ -119,11 +120,26 @@ export default class TextField extends Sprite {
     this._canvas.width = this._width;
     this._canvas.height = this._height;
     metrics.glyphs.forEach((glyph: GlyphData) => {
+
+
       let path: Path = glyph.data.getPath(glyph.position.x, glyph.position.y, glyph.style.fontSize);
       path['fill'] = glyph.style.fill || path['fill'];
       path['stroke'] = glyph.style.stroke || path['stroke'];
       path['strokeWidth'] = glyph.style.strokeWidth || path['strokeWidth'];
+
+
+      this._context.shadowColor = glyph.style.shadowColor || null;
+      this._context.shadowOffsetX = glyph.style.shadowOffsetX || null;
+      this._context.shadowOffsetY = glyph.style.shadowOffsetY || null;
+      this._context.shadowBlur = glyph.style.shadowBlur || null;
+
       path.draw(this._context);
+
+      // this._context.beginPath();
+      // this._context.moveTo(0, glyph.position.y);
+      // this._context.lineTo(this._width, glyph.position.y);
+      // this._context.stroke();
+
     });
 
   }
