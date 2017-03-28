@@ -98,7 +98,9 @@ export default class ComputeLayout {
     let glyphs: Array<GlyphData> = [];
     let lastGlyph = null;
     let lastLeading: number = 0;
-    let lastShadowOffsetY: number = 0;
+    let lastShadowBlur: number = 0;
+    let firstCharOfLineShadowOffsetX: number = 0;
+    let firstCharOfLineShadowBlur: number = 0;
 
 
     // Layout by line
@@ -111,7 +113,7 @@ export default class ComputeLayout {
       let lineDescender: number = 0;
       let lineFontSize: number = 0;
       let lineHeight: number = 0;
-      let shadowOffsetY: number = 0;
+      let lineShadowBlur: number = 0;
 
 
       for (let j = start, c = 0; j < end; j++ , c++) {
@@ -120,7 +122,11 @@ export default class ComputeLayout {
         lineAscender = Math.max(lineAscender, this.getPxByUnit(style.font.ascender, style));
         lineDescender = Math.max(lineDescender, this.getPxByUnit(style.font.descender, style));
         lineFontSize = Math.max(lineFontSize, style.fontSize);
-        shadowOffsetY = Math.max(shadowOffsetY, (style.shadowBlur || 0));
+        lineShadowBlur = Math.max(lineShadowBlur, (style.shadowBlur || 0));
+        if (j === start) {
+          firstCharOfLineShadowOffsetX = style.shadowOffsetX || 0;
+          firstCharOfLineShadowBlur = Math.max(firstCharOfLineShadowBlur, (style.shadowBlur || 0));
+        }
       }
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
@@ -135,7 +141,7 @@ export default class ComputeLayout {
       totalHeight += lineHeight;
       // lineWidth += shadowOffsetX;
 
-      lastShadowOffsetY = shadowOffsetY;
+      lastShadowBlur = lineShadowBlur;
       y += lineHeight;
 
       if (lineIndex !== 0) {
@@ -173,6 +179,10 @@ export default class ComputeLayout {
           x += -this.getPxByUnit(metrics.xMin, style);
         }
 
+        if (firstCharOfLineShadowOffsetX < 0) {
+          tx += firstCharOfLineShadowBlur;
+        }
+
         // Store glyph data
         glyphs.push({
           position: { x: x + tx, y: y },
@@ -187,7 +197,7 @@ export default class ComputeLayout {
         x += letterSpacing + this.getPxByUnit(glyph.advanceWidth, style);
         lastGlyph = glyph;
       }
-
+      firstCharOfLineShadowOffsetX = 0;
       // Advance down
       x = 0;
 
@@ -207,13 +217,14 @@ export default class ComputeLayout {
     let right = Math.max(0, preferredWidth - maxLineWidth - left);
 
     // TODO: add padding left and right if shadow offset or blur set for real center
+    console.log('firstCharOfLineShadowBlure', firstCharOfLineShadowOffsetX);
     return {
       glyphs: glyphs,
       lines: lines,
       left: left,
       right: right,
       width: preferredWidth,
-      height: totalHeight + lastShadowOffsetY
+      height: totalHeight + lastShadowBlur
     };
 
   }
@@ -244,7 +255,7 @@ export default class ComputeLayout {
       if (i < end - 1) {
         let nextGlyph = this.getGlyph(style.font, text.charAt(i + 1));
         kerning += this.getPxByUnit(style.font.getKerningValue(glyph, nextGlyph), style);
-        shadowOffsetX = style.shadowBlur;
+        shadowOffsetX = Math.abs(style.shadowBlur);
       }
 
       // determine if the new pen or width is above our limit
@@ -252,7 +263,7 @@ export default class ComputeLayout {
       let xMin = glyph.getMetrics().xMin || 0;
       let glyphWidth = xMax - xMin;
       let rsb = this.getRightSideBearing(glyph);
-      let newWidth = pen + this.getPxByUnit(glyph.getMetrics().leftSideBearing + glyphWidth + rsb, style) + (shadowOffsetX || 0);
+      let newWidth = pen + this.getPxByUnit(glyph.getMetrics().leftSideBearing + glyphWidth + rsb, style) + Math.abs(shadowOffsetX || 0);
       if (newWidth > width) {
         break;
       }

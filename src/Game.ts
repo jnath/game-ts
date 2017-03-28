@@ -95,7 +95,7 @@ export default class Game extends Layout {
           },
           h1: {
             shadowColor: 'black',
-            shadowOffsetX: 5,
+            shadowOffsetX: -5,
             shadowOffsetY: 5,
             shadowBlur: 10
           },
@@ -114,10 +114,12 @@ export default class Game extends Layout {
             fill: '#FF0000'
           }
         }, {
-            align: Align.CENTER
+            // align: Align.CENTER
           });
         textField.width = 207;
         textField.wordWrap = true;
+        textField.interactive = true;
+
         console.log(textField);
 
         this.addChild(textField);
@@ -128,15 +130,30 @@ export default class Game extends Layout {
         //   i++;
         // }, 1000);
 
-        // let gf: Graphics = new Graphics();
-        // setInterval(() => {
-        //   gf.clear();
-        //   gf.beginFill(0xFF0000, .5);
-        //   gf.drawRect(textField.x, textField.y, textField.width, textField.height);
-        //   gf.endFill();
-        // }, 100);
+        let gf: Graphics = new Graphics();
+        gf.interactive = true;
+        textField.on('click', () => {
+          gf.visible = !gf.visible;
+        });
+        textField.on('tap', () => {
+          gf.visible = !gf.visible;
+        });
+        gf.on('click', () => {
+          gf.visible = !gf.visible;
+        });
+        gf.on('tap', () => {
+          gf.visible = !gf.visible;
+        });
 
-        // this.addChild(gf);
+
+        setInterval(() => {
+          gf.clear();
+          gf.beginFill(0xFF0000, .5);
+          gf.drawRect(textField.x, textField.y, textField.width, textField.height);
+          gf.endFill();
+        }, 100);
+
+        this.addChild(gf);
       });
 
 

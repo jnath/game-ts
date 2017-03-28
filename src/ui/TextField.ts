@@ -33,7 +33,7 @@ declare module 'opentype.js' {
 export { Align }
 
 export interface TextFieldOptions {
-  align: Align;
+  align?: Align;
 }
 
 export default class TextField extends Sprite {
@@ -65,7 +65,7 @@ export default class TextField extends Sprite {
     this.resolution = 1;
     this._wordWrap = false;
     this._text = text;
-    this._options = options;
+    this._options = options || {};
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
 
@@ -120,11 +120,9 @@ export default class TextField extends Sprite {
 
     this._width = metrics.width;
     this._height = metrics.height;
-
     this._canvas.width = this._width;
     this._canvas.height = this._height;
     metrics.glyphs.forEach((glyph: GlyphData) => {
-
 
       let path: Path = glyph.data.getPath(glyph.position.x, glyph.position.y, glyph.style.fontSize);
       path['fill'] = glyph.style.fill || path['fill'];
