@@ -30,13 +30,19 @@ declare module 'opentype.js' {
   }
 }
 
+export { Align }
+
+export interface TextFieldOptions {
+  align: Align;
+}
+
 export default class TextField extends Sprite {
 
   private _text: string;
 
   private _canvas: HTMLCanvasElement;
   private _context: CanvasRenderingContext2D;
-  private _rendererOptions: RenderOptions;
+  private _options: TextFieldOptions;
   private _baselineY: number;
   private _lineHeight: number;
   private _wordWrap: boolean;
@@ -47,7 +53,7 @@ export default class TextField extends Sprite {
   private _styles: Styles;
 
 
-  constructor(text: string, styles: Styles, rendererOptions?: RenderOptions, canvas?: HTMLCanvasElement) {
+  constructor(text: string, styles: Styles, options?: TextFieldOptions, canvas?: HTMLCanvasElement) {
 
     canvas = canvas || document.createElement('canvas');
     canvas.width = 3;
@@ -59,7 +65,7 @@ export default class TextField extends Sprite {
     this.resolution = 1;
     this._wordWrap = false;
     this._text = text;
-    this._rendererOptions = rendererOptions;
+    this._options = options;
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
 
@@ -109,13 +115,11 @@ export default class TextField extends Sprite {
     let metrics = this.computeLayer.compute({
       width: this.width,
       mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY,
-      align: Align.CENTER
+      align: this._options.align
     });
 
     this._width = metrics.width;
     this._height = metrics.height;
-
-    console.log('metrics', metrics);
 
     this._canvas.width = this._width;
     this._canvas.height = this._height;

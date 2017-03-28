@@ -15,7 +15,7 @@ import Position from './process/Position';
 import GamePlay from './GamePlay';
 import StateManager, { MiddlewareData } from './StateManager';
 
-import TextField from './ui/TextField';
+import TextField, { Align } from './ui/TextField';
 
 import gsap from 'gsap';
 
@@ -113,9 +113,12 @@ export default class Game extends Layout {
           p: {
             fill: '#FF0000'
           }
-        });
-        textField.width = 200;
+        }, {
+            align: Align.CENTER
+          });
+        textField.width = 207;
         textField.wordWrap = true;
+        console.log(textField);
 
         this.addChild(textField);
 
@@ -125,15 +128,15 @@ export default class Game extends Layout {
         //   i++;
         // }, 1000);
 
-        let gf: Graphics = new Graphics();
-        setInterval(() => {
-          gf.clear();
-          gf.beginFill(0xFF0000, .5);
-          gf.drawRect(textField.x, textField.y, textField.width, textField.height);
-          gf.endFill();
-        }, 100);
+        // let gf: Graphics = new Graphics();
+        // setInterval(() => {
+        //   gf.clear();
+        //   gf.beginFill(0xFF0000, .5);
+        //   gf.drawRect(textField.x, textField.y, textField.width, textField.height);
+        //   gf.endFill();
+        // }, 100);
 
-        this.addChild(gf);
+        // this.addChild(gf);
       });
 
 

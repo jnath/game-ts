@@ -17,8 +17,6 @@ export enum Align {
 
 export interface ComputeLayoutOpts {
   align?: Align;
-  letterSpacing?: number;
-  lineHeight?: number;
   width: number;
   mode?: Mode;
 }
@@ -100,8 +98,7 @@ export default class ComputeLayout {
     let glyphs: Array<GlyphData> = [];
     let lastGlyph = null;
     let lastLeading: number = 0;
-    let maxShadowOffsetY: number = 0;
-    let maxShadowOffsetX: number = 0;
+    let lastShadowOffsetY: number = 0;
 
 
     // Layout by line
@@ -115,7 +112,6 @@ export default class ComputeLayout {
       let lineFontSize: number = 0;
       let lineHeight: number = 0;
       let shadowOffsetY: number = 0;
-      let shadowOffsetX: number = 0;
 
 
       for (let j = start, c = 0; j < end; j++ , c++) {
@@ -124,8 +120,7 @@ export default class ComputeLayout {
         lineAscender = Math.max(lineAscender, this.getPxByUnit(style.font.ascender, style));
         lineDescender = Math.max(lineDescender, this.getPxByUnit(style.font.descender, style));
         lineFontSize = Math.max(lineFontSize, style.fontSize);
-        shadowOffsetY = Math.max(shadowOffsetY, style.shadowOffsetY || 0);
-        shadowOffsetX = style.shadowOffsetX || 0;
+        shadowOffsetY = Math.max(shadowOffsetY, (style.shadowBlur || 0));
       }
       for (let j = start, c = 0; j < end; j++ , c++) {
         let char = text.charAt(j);
@@ -140,8 +135,7 @@ export default class ComputeLayout {
       totalHeight += lineHeight;
       // lineWidth += shadowOffsetX;
 
-      maxShadowOffsetX = Math.max(maxShadowOffsetX, shadowOffsetX);
-      maxShadowOffsetY = Math.max(maxShadowOffsetY, shadowOffsetY);
+      lastShadowOffsetY = shadowOffsetY;
       y += lineHeight;
 
       if (lineIndex !== 0) {
@@ -196,8 +190,6 @@ export default class ComputeLayout {
 
       // Advance down
       x = 0;
-      // totalHeight += lineHeight + leading;
-      // y += lineHeight + leading;
 
       lastLeading = leading;
 
@@ -214,13 +206,14 @@ export default class ComputeLayout {
     }
     let right = Math.max(0, preferredWidth - maxLineWidth - left);
 
+    // TODO: add padding left and right if shadow offset or blur set for real center
     return {
       glyphs: glyphs,
       lines: lines,
       left: left,
       right: right,
-      width: preferredWidth + maxShadowOffsetX,
-      height: totalHeight + maxShadowOffsetY
+      width: preferredWidth,
+      height: totalHeight + lastShadowOffsetY
     };
 
   }
@@ -237,6 +230,8 @@ export default class ComputeLayout {
     let count = 0;
     let curWidth = 0;
     let ligneHeight = 0;
+    let shadowOffsetX = 0;
+
 
     for (let i = start; i < end; i++) {
       let char = text.charAt(i);
@@ -249,6 +244,7 @@ export default class ComputeLayout {
       if (i < end - 1) {
         let nextGlyph = this.getGlyph(style.font, text.charAt(i + 1));
         kerning += this.getPxByUnit(style.font.getKerningValue(glyph, nextGlyph), style);
+        shadowOffsetX = style.shadowBlur;
       }
 
       // determine if the new pen or width is above our limit
@@ -256,7 +252,7 @@ export default class ComputeLayout {
       let xMin = glyph.getMetrics().xMin || 0;
       let glyphWidth = xMax - xMin;
       let rsb = this.getRightSideBearing(glyph);
-      let newWidth = pen + this.getPxByUnit(glyph.getMetrics().leftSideBearing + glyphWidth + rsb, style);
+      let newWidth = pen + this.getPxByUnit(glyph.getMetrics().leftSideBearing + glyphWidth + rsb, style) + (shadowOffsetX || 0);
       if (newWidth > width) {
         break;
       }
