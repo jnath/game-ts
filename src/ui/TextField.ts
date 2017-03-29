@@ -42,7 +42,6 @@ export default class TextField extends Sprite {
 
   private _canvas: HTMLCanvasElement;
   private _context: CanvasRenderingContext2D;
-  private _options: TextFieldOptions;
   private _baselineY: number;
   private _lineHeight: number;
   private _wordWrap: boolean;
@@ -51,9 +50,9 @@ export default class TextField extends Sprite {
   private computeLayer: ComputeLayout;
 
   private _styles: Styles;
+  private _align: Align;
 
-
-  constructor(text: string, styles: Styles, options?: TextFieldOptions, canvas?: HTMLCanvasElement) {
+  constructor(text: string, styles: Styles, options: TextFieldOptions = {}, canvas?: HTMLCanvasElement) {
 
     canvas = canvas || document.createElement('canvas');
     canvas.width = 3;
@@ -65,7 +64,7 @@ export default class TextField extends Sprite {
     this.resolution = 1;
     this._wordWrap = false;
     this._text = text;
-    this._options = options || {};
+    this._align = options.align || Align.LEFT;
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
 
@@ -102,12 +101,16 @@ export default class TextField extends Sprite {
     }
   }
 
+  get align(): Align { return this._align; }
+  set align(value: Align) {
+    this._align = value;
+    this.updateText();
+  }
+
   get wordWrap(): boolean { return this._wordWrap; }
   set wordWrap(value: boolean) {
     this._wordWrap = value;
-    if (this._wordWrap) {
-      this.updateText();
-    }
+    this.updateText();
   }
 
   updateText() {
@@ -115,7 +118,7 @@ export default class TextField extends Sprite {
     let metrics = this.computeLayer.compute({
       width: this.width,
       mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY,
-      align: this._options.align
+      align: this._align
     });
 
     this._width = metrics.width;

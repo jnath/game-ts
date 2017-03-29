@@ -1,6 +1,8 @@
 
 import { Container, Sprite, Texture, extras, Graphics } from 'pixi.js';
 
+import dat from 'dat-gui';
+
 import Spine = PIXI.spine.Spine;
 import SkeletonData = PIXI.spine.core.SkeletonData;
 
@@ -116,9 +118,19 @@ export default class Game extends Layout {
         }, {
             // align: Align.CENTER
           });
+        textField.align = Align.CENTER;
         textField.width = 207;
         textField.wordWrap = true;
         textField.interactive = true;
+        let gui = new dat.GUI();
+        gui.add(textField, 'text');
+        gui.add(textField, 'width', 0, this.width);
+        gui.add(textField, 'align', {
+          'left': 1,
+          'center': 2,
+          'right': 3
+        });
+        gui.add(textField, 'wordWrap');
 
         console.log(textField);
 
