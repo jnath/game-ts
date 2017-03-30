@@ -125,11 +125,20 @@ export default class Game extends Layout {
         let gui = new dat.GUI();
         gui.add(textField, 'text');
         gui.add(textField, 'width', 0, this.width);
-        gui.add(textField, 'align', {
-          'left': 1,
-          'center': 2,
-          'right': 3
-        });
+        let proxyAlign = {};
+        Object.defineProperty(proxyAlign, 'align', {
+          get: function() {
+            return textField.align;
+          },
+          set: function(value){
+            textField.align = parseInt(value);
+          }
+        })
+        gui.add(proxyAlign, 'align', {
+          'left': Align.LEFT,
+          'center': Align.CENTER,
+          'right': Align.RIGHT
+        })
         gui.add(textField, 'wordWrap');
 
         console.log(textField);

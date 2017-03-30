@@ -60,6 +60,12 @@ const defaultTag: Styles = {
   p: {
     fontSize: 13,
     display: DisplayMode.BLOCK
+  },
+  b: {
+    fontSubFamily: 'bold'
+  },
+  i: {
+    fontSubFamily: 'italic'
   }
 };
 
