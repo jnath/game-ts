@@ -114,7 +114,6 @@ export default class TextField extends Sprite {
   }
 
   updateText() {
-    console.log(this._wordWrap, this.width);
     let metrics = this.computeLayer.compute({
       width: this._wordWrap ? this.width : null,
       mode: !this._wordWrap || this.width <= 0 ? Mode.NO_WRAP : Mode.GREEDY,

@@ -139,7 +139,6 @@ export default class ComputeLayout {
       let leading = lineHeight - AD;
 
       totalHeight += lineHeight;
-      // lineWidth += shadowOffsetX;
 
       lastShadowBlur = lineShadowBlur;
       y += lineHeight;
@@ -217,7 +216,6 @@ export default class ComputeLayout {
     let right = Math.max(0, preferredWidth - maxLineWidth - left);
 
     // TODO: add padding left and right if shadow offset or blur set for real center
-    console.log('firstCharOfLineShadowBlure', firstCharOfLineShadowOffsetX);
     return {
       glyphs: glyphs,
       lines: lines,
