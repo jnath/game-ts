@@ -133,12 +133,12 @@ export default class Game extends Layout {
           set: function(value){
             textField.align = parseInt(value);
           }
-        })
+        });
         gui.add(proxyAlign, 'align', {
           'left': Align.LEFT,
           'center': Align.CENTER,
           'right': Align.RIGHT
-        })
+        });
         gui.add(textField, 'wordWrap');
 
         console.log(textField);
