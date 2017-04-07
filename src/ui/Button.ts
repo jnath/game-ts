@@ -1,13 +1,14 @@
-import { Texture, Container, utils, extras, Text, ITextStyleStyle, TextStyle } from 'pixi.js';
+import { Texture, Container, utils, extras } from 'pixi.js';
 import EventEmitter = utils.EventEmitter;
 import AnimatedSprite = extras.AnimatedSprite;
 import Scale9Grid from './Scale9Grid';
 import Padding from './Padding';
 import Layout, { Dock } from './Layout';
+import TextField, { Styles } from './TextField';
 
 export interface StatContent {
   background: Scale9Grid;
-  textStyle?: ITextStyleStyle;
+  textStyle?: Styles;
 }
 
 export interface Stats {
@@ -37,10 +38,10 @@ export default class Button extends Layout {
   private _stat: Stat;
   private _disabled: boolean;
 
-  private textfield: Text;
+  private textfield: TextField;
   private _text: string;
 
-  private _defaultTextStyle: ITextStyleStyle = {};
+  private _defaultTextStyle: Styles = <any>{};
 
   private _padding: Padding = new Padding(20, 20, 20, 20);
 
@@ -77,9 +78,10 @@ export default class Button extends Layout {
     }
   }
 
-  get defaultTextStyle(): ITextStyleStyle { return this._defaultTextStyle; }
-  set defaultTextStyle(value: ITextStyleStyle) {
+  get defaultTextStyle(): Styles { return this._defaultTextStyle; }
+  set defaultTextStyle(value: Styles) {
     this._defaultTextStyle = value;
+    this.textfield.once('updated', () => this.updateResize());
   }
 
   get text(): string { return this._text; }
@@ -88,7 +90,7 @@ export default class Button extends Layout {
     if (!this.textfield) {
       this.addTextField();
     }
-    this.textfield.texture.baseTexture.once('update', () => this.updateResize());
+    this.textfield.once('updated', () => this.updateResize());
     this.textfield.text = this._text;
   }
 
@@ -108,14 +110,14 @@ export default class Button extends Layout {
   get stat(): Stat { return this._stat; }
   set stat(value: Stat) {
     this._stat = value;
+    if (this.currentStat === this._stat) {
+      return;
+    }
     this.setStat(this._stat);
   }
 
   private setStat(stat: Stat) {
     let lastStat: Stat = stat;
-    if (this.currentStat === stat) {
-      return;
-    }
 
     if (this.stats[Stat[this.currentStat]]) {
       this.stats[Stat[this.currentStat]].background.visible = false;
@@ -131,18 +133,19 @@ export default class Button extends Layout {
     if (this.stats[Stat[this.currentStat]].textStyle && !this.textfield) {
       this.addTextField();
     }
-    this.textfield.texture.baseTexture.once('update', () => this.updateResize());
-    this.textfield.style = new TextStyle(Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle));
+    this.textfield.once('updated', () => this.updateResize());
+    this.textfield.styles = Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle);
     this.emit('updateStat', { lastStat, currentStat: this.currentStat });
   }
 
   private addTextField() {
-    this.textfield = new Text(' ', Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle));
+    this.textfield = new TextField(' ', Object.assign({}, this.defaultTextStyle, this.stats[Stat[this.currentStat]].textStyle));
     this.textfield.dock = Dock.CENTER | Dock.MIDDLE;
     this.addChild(this.textfield);
+    setTimeout(() => this.setStat(this.currentStat), 0);
   }
 
-  add(stat: Stat, texture: Scale9Grid, textStyle?: TextStyle) {
+  add(stat: Stat, texture: Scale9Grid, textStyle?: Styles) {
     texture.visible = false;
     this.stats[Stat[stat]].background = texture;
     this.stats[Stat[stat]].textStyle = textStyle;

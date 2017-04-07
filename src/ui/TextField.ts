@@ -30,7 +30,7 @@ declare module 'opentype.js' {
   }
 }
 
-export { Align }
+export { Align, Style, Styles }
 
 export interface TextFieldOptions {
   align?: Align;
@@ -67,8 +67,18 @@ export default class TextField extends Sprite {
     this._align = options.align || Align.LEFT;
     this._canvas = canvas;
     this._context = this._canvas.getContext('2d');
+    this._texture.on('update', () => {
+      this.emit('updated');
+    });
 
-    this._styles = <any>{};
+    this.computeLayer = new ComputeLayout(this._text, this.parseStyle(styles));
+    this._styles = this.computeLayer.styles;
+
+    this.updateText();
+  }
+
+  private parseStyle(styles: Styles) {
+    let _styles = <any>{};
     Object.keys(styles).forEach((tagName: string) => {
       let style: Style = Object.assign({}, styles[tagName]);
       if (style.fontName) {
@@ -76,20 +86,22 @@ export default class TextField extends Sprite {
       } else if (style.fontFamily) {
         style.font = AssetLoader.getFontFamily(style.fontFamily, style.fontSubFamily);
       }
-      this._styles[tagName] = style;
+      _styles[tagName] = style;
     });
-
-    this.computeLayer = new ComputeLayout(this._text, this._styles);
-    this._styles = this.computeLayer.styles;
-
-    this.updateText();
-
+    return _styles;
   }
 
   get text(): string { return this._text; }
   set text(value: string) {
     this._text = value;
     this.computeLayer.text = this._text;
+    this.updateText();
+  }
+
+  get styles(): Styles { return this._styles; }
+  set styles(value: Styles) {
+    this.computeLayer.styles = this.parseStyle(value);
+    this._styles = this.computeLayer.styles;
     this.updateText();
   }
 

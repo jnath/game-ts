@@ -41,16 +41,19 @@ export default class GamePlay extends Container {
     this.hero = new Hero();
     this.hero.x = - this.hero.width;
     this.hero.y = this.height - this.hero.height;
+    this.hero.visible = false;
     this.addChild(this.hero);
 
   }
 
   start() {
+    this.hero.visible = true;
     this.ticker.start();
     this.hero.walk();
   }
 
   stop() {
+    this.hero.visible = false;
     this.ticker.stop();
     this.hero.idle();
   }
@@ -60,7 +63,7 @@ export default class GamePlay extends Container {
       return;
     }
     this.parallax.move -= 3 + this.impulse;
-    this.hero.x = ( this.width - this.hero.width ) / 2;
+    this.hero.x = ( this.parallax.width - this.hero.width ) / 2;
     if ( this.hero.y < this.parallax.height - this.floor) {
       this.hero.y += 9.8;
     }else if (this.hero.y > this.parallax.height - this.floor) {

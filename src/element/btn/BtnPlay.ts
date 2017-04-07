@@ -1,7 +1,8 @@
 
-import { Texture, Rectangle, ITextStyleStyle } from 'pixi.js';
+import { Texture, Rectangle } from 'pixi.js';
 import Scale9Grid from '../../ui/Scale9Grid';
 import Button from '../../ui/Button';
+import { Styles, Align } from '../../ui/TextField';
 
 export default class BtnPlay extends Button {
 
@@ -12,25 +13,28 @@ export default class BtnPlay extends Button {
     let overBg: Texture = Texture.fromImage('button_green');
     let downBg: Texture = Texture.fromImage('button_orange');
     let grid9Rect: Rectangle = new Rectangle(20, 20, defaultBg.width - 40, defaultBg.height - 40);
-    let textStyleDefault: ITextStyleStyle = {
-      fontFamily: 'komika_axisregular',
-      fontSize: 24,
-      align: 'center',
-      fill: '#FFFFFF'
+    let textStyleDefault: Styles = {
+      default: {
+        fontName: 'AcmeFont',
+        fontSize: 24,
+        fill: '#FFFFFF'
+      }
     };
 
-    let textStyleOver: ITextStyleStyle = {
-      fontFamily: 'komika_axisregular',
-      fontSize: 24,
-      align: 'center',
-      fill: '#000000'
+    let textStyleOver: Styles = {
+      default: {
+        fontName: 'AcmeFont',
+        fontSize: 24,
+        fill: '#000000'
+      }
     };
 
-    let textStyleDown: ITextStyleStyle = {
-      fontFamily: 'komika_axisregular',
-      fontSize: 24,
-      align: 'center',
-      fill: '#FF0000'
+    let textStyleDown: Styles = {
+      default: {
+        fontName: 'AcmeFont',
+        fontSize: 24,
+        fill: '#FF0000'
+      }
     };
 
     super({
