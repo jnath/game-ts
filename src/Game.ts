@@ -17,7 +17,7 @@ import Position from './process/Position';
 import GamePlay from './GamePlay';
 import StateManager, { MiddlewareData } from './StateManager';
 
-import TextField, { Align } from './ui/TextField';
+import TextField, { Align } from 'textfield';
 
 import gsap from 'gsap';
 

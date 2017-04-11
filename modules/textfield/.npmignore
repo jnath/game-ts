@@ -1,0 +1,9 @@
+./src
+./.vscode
+./node_modules
+./scripts
+./tsconfig.json
+./tslint.json
+./system.config.js
+./index.html
+./.gitignore

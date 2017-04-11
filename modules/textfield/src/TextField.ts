@@ -1,39 +1,25 @@
 
 import { Sprite, Texture, Graphics } from 'pixi.js';
-import { Font, FontOptions, RenderOptions, BoundingBox, Glyph, Metrics, Path } from 'opentype.js';
-import AssetLoader from '../process/AssetLoader';
+import { Font, FontOptions, RenderOptions, Glyph, Metrics, Path } from 'opentype.js';
+
+import FontLoader from './FontLoader';
 
 import ComputeLayout, { GlyphData, Mode, Align } from './tools/ComputeLayout';
 import { TextStyle } from './TextStyle';
 
 import TagMapper, { Styles, Style } from './tools/TagMapper';
-// import WordWrapper, { WordWrapperOpts, Line, MeasureIterator } from './tools/WordWrapper';
 
 // Most browsers have a default font size of 16px
 
-declare module 'opentype.js' {
-  export interface BoundingBox {
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-    isEmpty(): boolean;
-    addPoint(x: number, y: number);
-    addX(x: number);
-    addY(y: number);
-    addBezier(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x: number, y: number);
-    addQuad(x0: number, y0: number, x1: number, y1: number, x: number, y: number);
-  }
-
-  export interface Path {
-    getBoundingBox(): BoundingBox;
-  }
-}
 
 export { Align, Style, Styles }
 
 export interface TextFieldOptions {
   align?: Align;
+}
+
+function isStyles(object: any): object is Styles {
+    return 'default' in object;
 }
 
 export default class TextField extends Sprite {
@@ -52,7 +38,7 @@ export default class TextField extends Sprite {
   private _styles: Styles;
   private _align: Align;
 
-  constructor(text: string, styles: Styles, options: TextFieldOptions = {}, canvas?: HTMLCanvasElement) {
+  constructor(text: string, styles: Styles | Style, options: TextFieldOptions = {}, canvas?: HTMLCanvasElement) {
 
     canvas = canvas || document.createElement('canvas');
     canvas.width = 3;
@@ -71,7 +57,14 @@ export default class TextField extends Sprite {
       this.emit('updated');
     });
 
-    this.computeLayer = new ComputeLayout(this._text, this.parseStyle(styles));
+    let tmpStyles: Styles = { default: {} };
+    if (isStyles(styles)) {
+      tmpStyles = styles;
+    } else {
+      tmpStyles.default = styles;
+    }
+
+    this.computeLayer = new ComputeLayout(this._text, this.parseStyle(tmpStyles));
     this._styles = this.computeLayer.styles;
 
     this.updateText();
@@ -82,9 +75,9 @@ export default class TextField extends Sprite {
     Object.keys(styles).forEach((tagName: string) => {
       let style: Style = Object.assign({}, styles[tagName]);
       if (style.fontName) {
-        style.font = AssetLoader.getFont(style.fontName);
+        style.font = FontLoader.getFont(style.fontName);
       } else if (style.fontFamily) {
-        style.font = AssetLoader.getFontFamily(style.fontFamily, style.fontSubFamily);
+        style.font = FontLoader.getFontFamily(style.fontFamily, style.fontSubFamily);
       }
       _styles[tagName] = style;
     });
@@ -150,11 +143,6 @@ export default class TextField extends Sprite {
       this._context.shadowBlur = glyph.style.shadowBlur || null;
 
       path.draw(this._context);
-
-      // this._context.beginPath();
-      // this._context.moveTo(0, glyph.position.y);
-      // this._context.lineTo(this._width, glyph.position.y);
-      // this._context.stroke();
 
     });
 

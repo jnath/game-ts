@@ -4,7 +4,7 @@ import Panel from '../ui/Panel';
 import BtnPlay from './btn/BtnPlay';
 import Scale9Grid from '../ui/Scale9Grid';
 import { Dock } from '../ui/Layout';
-import TextField from '../ui/TextField';
+import TextField from 'textfield';
 
 export default class Intro extends Panel {
 

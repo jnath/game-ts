@@ -4,7 +4,7 @@ import AnimatedSprite = extras.AnimatedSprite;
 import Scale9Grid from './Scale9Grid';
 import Padding from './Padding';
 import Layout, { Dock } from './Layout';
-import TextField, { Styles } from './TextField';
+import TextField, { Styles } from 'textfield';
 
 export interface StatContent {
   background: Scale9Grid;

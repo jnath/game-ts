@@ -1,0 +1,28 @@
+{
+  "name": "textfield",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bundles": "npm run build && node ./scripts/bundles.js",
+    "build": "tsc -p .",
+    "clean": "rimraf ./dist && rimraf ./lib rimraf ./index.d.ts"
+  },
+  "devDependencies": {
+    "@types/opentype.js": "0.0.0",
+    "@types/pixi.js": "^4.3.1",
+    "dts-bundle": "^0.7.2",
+    "http-server": "^0.9.0",
+    "rimraf": "^2.6.1",
+    "systemjs": "^0.19.42",
+    "systemjs-builder": "^0.16.4",
+    "typescript": "^2.3.0-dev.20170407"
+  },
+  "dependencies": {
+    "opentype.js": "^0.6.9",
+    "pixi.js": "^4.3.3"
+  },
+  "author": "",
+  "license": "ISC"
+}
