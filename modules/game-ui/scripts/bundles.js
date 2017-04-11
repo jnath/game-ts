@@ -10,7 +10,7 @@ const config = {
   sourceMaps: true,
   externals: [
     'pixi.js',
-    'opentype.js'
+    'textfield'
   ]
 }
 

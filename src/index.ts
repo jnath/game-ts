@@ -1,7 +1,7 @@
 import { Application, Container, Graphics } from 'pixi.js';
 import 'pixi-spine';
 
-import './display/Container';
+import './ui/Container';
 
 import Game from './Game';
 import AssetLoader from './process/AssetLoader';
