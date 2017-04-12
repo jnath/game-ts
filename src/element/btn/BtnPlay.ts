@@ -1,8 +1,8 @@
 
 import { Texture, Rectangle } from 'pixi.js';
-import Scale9Grid from '../../ui/Scale9Grid';
-import Button from '../../ui/Button';
-import { Styles, Align } from '../../ui/TextField';
+import Scale9Grid from 'game-ui/Scale9Grid';
+import Button from 'game-ui/Button';
+import { Styles, Align } from 'textfield';
 
 export default class BtnPlay extends Button {
 

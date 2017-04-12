@@ -1,11 +1,10 @@
-/// <reference types="pixi.js" />
-import { ITextStyleStyle, TextStyle } from 'pixi.js';
 import Scale9Grid from './Scale9Grid';
 import Padding from './Padding';
 import Layout from './Layout';
+import { Styles } from 'textfield';
 export interface StatContent {
     background: Scale9Grid;
-    textStyle?: ITextStyleStyle;
+    textStyle?: Styles;
 }
 export interface Stats {
     [stat: string]: StatContent;
@@ -35,12 +34,12 @@ export default class Button extends Layout {
     private _padding;
     constructor(stats: Stats, padding?: Padding);
     onResize(): void;
-    defaultTextStyle: ITextStyleStyle;
+    defaultTextStyle: Styles;
     text: string;
     private updateResize();
     disabled: boolean;
     stat: Stat;
     private setStat(stat);
     private addTextField();
-    add(stat: Stat, texture: Scale9Grid, textStyle?: TextStyle): void;
+    add(stat: Stat, texture: Scale9Grid, textStyle?: Styles): void;
 }

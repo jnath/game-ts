@@ -1,9 +1,9 @@
 import { Texture, Rectangle } from 'pixi.js';
 
-import Panel from '../ui/Panel';
+import Panel from 'game-ui/Panel';
 import BtnPlay from './btn/BtnPlay';
-import Scale9Grid from '../ui/Scale9Grid';
-import { Dock } from '../ui/Layout';
+import Scale9Grid from 'game-ui/Scale9Grid';
+import { Dock } from 'game-ui/Layout';
 import TextField from 'textfield';
 
 export default class Intro extends Panel {

@@ -37,3 +37,5 @@ Object.defineProperty(Container.prototype, 'scaleXY', {
     enumerable: true,
     configurable: true
 });
+
+export default Container;

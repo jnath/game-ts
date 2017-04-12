@@ -1,3 +1,4 @@
+import { Container } from 'pixi.js';
 declare module 'pixi.js' {
     interface Container {
         scaleX: number;
@@ -5,4 +6,4 @@ declare module 'pixi.js' {
         scaleXY: number;
     }
 }
-export {};
+export default Container;

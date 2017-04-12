@@ -4,7 +4,6 @@
 //   Layout.d.ts
 
 declare module 'game-ui' {
-    import './Container';
     export { default as Button } from 'game-ui/Button';
     export { default as Layout } from 'game-ui/Layout';
     export { default as Padding } from 'game-ui/Padding';

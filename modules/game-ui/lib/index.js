@@ -1,10 +1,8 @@
-System.register(["./Container", "./Button", "./Layout", "./Padding", "./Panel", "./ProgressBar", "./Scale9Grid"], function (exports_1, context_1) {
+System.register(["./Button", "./Layout", "./Padding", "./Panel", "./ProgressBar", "./Scale9Grid"], function (exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     return {
         setters: [
-            function (_1) {
-            },
             function (Button_1_1) {
                 exports_1({
                     "Button": Button_1_1["default"]

@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -p .",
-    "build-watch": "tsc -p . -w",
     "start": "hs -p 8081",
-    "release": "node release.js"
+    "bundles": "npm run build && node ./scripts/bundles.js",
+    "build": "tsc -p .",
+    "clean": "rimraf ./dist && rimraf ./lib && rimraf ./index.d.ts"
   },
   "author": "",
   "license": "ISC",
@@ -30,6 +30,7 @@
     "opentype.js": "^0.6.9",
     "pixi-spine": "^1.4.1",
     "pixi.js": "^4.3.3",
-    "textfield": "./modules/textfield"
+    "textfield": "./modules/textfield",
+    "game-ui": "./modules/game-ui"
   }
 }

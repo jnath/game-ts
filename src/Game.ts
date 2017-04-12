@@ -8,9 +8,9 @@ import SkeletonData = PIXI.spine.core.SkeletonData;
 
 import AssetLoader, { Loader } from './process/AssetLoader';
 
-import Layout, { Dock } from './ui/Layout';
-import ProgressBar from './ui/ProgressBar';
-import Padding from './ui/Padding';
+import Layout, { Dock } from 'game-ui/Layout';
+import ProgressBar from 'game-ui/ProgressBar';
+import Padding from 'game-ui/Padding';
 import Intro from './element/Intro';
 import Parallax from './component/Parallax';
 import Position from './process/Position';

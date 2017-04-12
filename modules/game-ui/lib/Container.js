@@ -36,6 +36,7 @@ System.register(["pixi.js"], function (exports_1, context_1) {
                 enumerable: true,
                 configurable: true
             });
+            exports_1("default", pixi_js_1.Container);
         }
     };
 });
