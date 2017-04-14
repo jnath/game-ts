@@ -1,12 +1,9 @@
 import { Application, Container, Graphics } from 'pixi.js';
 import 'pixi-spine';
 
-import './ui/Container';
-
+import 'game-ui/Container';
 import Game from './Game';
 import AssetLoader from './process/AssetLoader';
-
-
 
 declare global {
   interface Window {

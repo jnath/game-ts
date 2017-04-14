@@ -3,7 +3,9 @@ import { utils, loaders } from 'pixi.js';
 import EventEmitter = utils.EventEmitter;
 import Loader = loaders.Loader;
 import Resource = loaders.Resource;
-import opentype, { Font } from 'opentype.js';
+// import opentype, { Font } from 'opentype.js';
+
+import { FontLoader, Font } from 'textfield';
 
 interface AssetList {
   [cathName: string]: { [name: string]: string };
@@ -33,15 +35,16 @@ export default class AssetLoader extends EventEmitter {
     super();
   }
 
-  private static _fonts: { [fontName: string]: Font } = {};
-  private static _fontsMapName: { [fontFamily: string]: {[ fontSubFamily: string]: string } } = {};
+  // private static _fonts: { [fontName: string]: Font } = {};
+  // private static _fontsMapName: { [fontFamily: string]: {[ fontSubFamily: string]: string } } = {};
 
-  static getFontFamily(fontFamily: string, fontSubfamily: string = 'Regular'): Font {
-    return AssetLoader._fonts[AssetLoader._fontsMapName[fontFamily][fontSubfamily]];
-  }
-  static getFont(name: string): Font {
-    return AssetLoader._fonts[name];
-  }
+  // static getFontFamily(fontFamily: string, fontSubfamily: string = 'Regular'): Font {
+  //   FontLoader.get
+  //   return AssetLoader._fonts[AssetLoader._fontsMapName[fontFamily][fontSubfamily]];
+  // }
+  // static getFont(name: string): Font {
+  //   return AssetLoader._fonts[name];
+  // }
 
   static getAssetList() {
 
@@ -61,19 +64,9 @@ export default class AssetLoader extends EventEmitter {
         loader.use((ressource: Resource, next: () => void) => {
           let ext: string = ressource.url.split('/').pop().split('.')[1];
           if (AssetLoader.fontExts.indexOf(ext) !== -1) {
-            opentype.load(ressource.url, (err: any, font?: opentype.Font) => {
+            FontLoader.load(ressource.url, (err: any, font?: opentype.Font) => {
               if (err) {
                 throw err;
-              }
-              if (font) {
-                console.log(`font loaded name : ${font.names.postScriptName['en']} from ${ressource.url}`, font.names);
-                AssetLoader._fonts[font.names.postScriptName['en']] = font;
-                if (!AssetLoader._fontsMapName[font.names.fontFamily['en']]) {
-                  AssetLoader._fontsMapName[font.names.fontFamily['en']] = {};
-                }
-                AssetLoader._fontsMapName[font.names.fontFamily['en']][font.names.fontSubfamily['en']] = font.names.postScriptName['en'];
-              } else {
-                throw Error(`Font ${ressource.url} is not loaded`);
               }
               next();
             });

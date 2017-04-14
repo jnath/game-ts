@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
     "module": "system",
+    "moduleResolution": "classic",
     "target": "es5",
     "rootDir": "./src",
     "outDir": "./lib",
     "baseUrl": "./",
     "paths": {
-      "gsap": ["./node_modules/@types/gsap/index.d.ts"],
-      "matter-js": ["./node_modules/@types/matter-js/index.d.ts"]
-    },
-    "lib": ["es2017", "dom", "scripthost"]
+      "textfield":["./node_modules/textfield/index.d.ts"],
+      "game-ui/*":["./node_modules/game-ui/lib/*"]
+    }
   },
   "exclude": [
-    "./modules"
+    "modules",
+    "node_modules"
   ]
 }

@@ -60,14 +60,7 @@ declare module 'game-ui/Layout' {
         CENTER = 32,
         MIDDLE = 64,
     }
-    declare module 'game-ui/index//pixi.js' {
-        interface Container {
-            dock: Dock;
-            dockX?: number;
-            dockY?: number;
-            dockPivot: (x: number, y: number) => void;
-        }
-    }
+
     export default class Layout extends Container {
         protected _width: number;
         protected _height: number;
